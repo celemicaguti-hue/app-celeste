@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff85a1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Celeste ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink: #ff85a1;
+  --pink-soft: #ffcfdf;
+  --blue: #bde0fe;
+  --blue-deep: #90c9f9;
+  --mint: #b5ead7;
+  --lavender: #e8d5f5;
+  --glass: rgba(255,255,255,0.72);
+  --glass-strong: rgba(255,255,255,0.92);
+  --text: #3d3450;
+  --text-soft: #9090a8;
+  --shadow: 0 8px 32px rgba(180,130,180,0.13);
+  --radius: 28px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(135deg, #ffd6e8 0%, #c8e6ff 50%, #d4f0e8 100%);
+  min-height: 100vh;
+  padding: 16px 12px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── LOCK SCREEN ── */
+#lock-screen {
+  position: fixed; inset: 0;
+  background: linear-gradient(135deg, #ffd6e8 0%, #c8e6ff 50%, #d4f0e8 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999; padding: 30px;
+}
+.lock-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 38px; font-weight: 900;
+  background: linear-gradient(90deg, var(--pink), #b36fff, var(--blue-deep));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 8px;
+}
+.lock-sub { font-size: 11px; color: var(--text-soft); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; }
+.lock-card {
+  background: var(--glass-strong);
+  border: 1px solid rgba(255,255,255,0.9);
+  border-radius: 28px;
+  padding: 34px 28px;
+  width: 100%; max-width: 360px;
+  box-shadow: 0 20px 60px rgba(180,130,180,0.2);
+  text-align: center;
+}
+.lock-icon { font-size: 40px; margin-bottom: 16px; }
+.lock-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.lock-hint { font-size: 12px; color: var(--text-soft); font-weight: 700; margin-bottom: 24px; }
+.lock-input {
+  width: 100%; padding: 15px 20px;
+  border-radius: 18px;
+  border: 2px solid rgba(255,133,161,0.25);
+  background: rgba(255,255,255,0.8);
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700; color: var(--text);
+  outline: none; text-align: center; letter-spacing: 2px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.lock-input:focus { border-color: var(--pink); }
+.lock-input.shake { animation: shake 0.4s ease; border-color: #ff4757; }
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 60%{transform:translateX(8px)}
+}
+.lock-btn {
+  background: linear-gradient(135deg, var(--pink), #c97fff);
+  color: white; border: none; padding: 15px 0; width: 100%;
+  border-radius: 18px; font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 900; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(255,133,161,0.35);
+  transition: transform 0.1s;
+}
+.lock-btn:active { transform: scale(0.97); }
+.lock-error { font-size: 12px; color: #ff4757; font-weight: 800; margin-top: 12px; min-height: 18px; }
+.lock-flowers { font-size: 24px; letter-spacing: 8px; margin-bottom: 20px; opacity: 0.5; }
+
+/* ── MAIN APP ── */
+#main-app { width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+.app-header { text-align: center; margin-bottom: 16px; }
+.app-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 900;
+  background: linear-gradient(90deg, var(--pink), #b36fff, var(--blue-deep));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  letter-spacing: -0.5px;
+}
+.app-subtitle { font-size: 11px; color: var(--text-soft); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+.lock-exit-btn {
+  position: fixed; top: 14px; right: 14px;
+  background: rgba(255,255,255,0.7); border: 1px solid rgba(255,133,161,0.2);
+  border-radius: 12px; padding: 7px 12px; font-size: 11px; font-weight: 800;
+  color: var(--text-soft); cursor: pointer; z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.lock-exit-btn:hover { background: rgba(255,255,255,0.9); color: var(--pink); }
+
+/* ── TABS ── */
+.tab-bar {
+  display: flex; gap: 6px;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px);
+  padding: 5px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.85);
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+  flex-wrap: wrap; justify-content: center;
+  max-width: 520px; width: 100%;
+}
+.tab-btn {
+  padding: 9px 14px; border-radius: 16px; border: none;
+  background: transparent; font-family: 'Nunito', sans-serif;
+  font-size: 12px; font-weight: 800; color: var(--text-soft);
+  cursor: pointer; transition: all 0.25s; white-space: nowrap;
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--pink), #c97fff);
+  color: white; box-shadow: 0 4px 14px rgba(255,133,161,0.4);
+}
+
+/* ── PANEL ── */
+.tab-panel { display: none; width: 100%; max-width: 520px; }
+.tab-panel.active { display: block; }
+
+/* ── CARD ── */
+.card {
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.85);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 700; color: var(--text);
+  margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+}
+
+/* ── PILLS ── */
+.pills-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; justify-content: center; }
+.pill {
+  padding: 7px 16px; border-radius: 18px;
+  border: 1.5px solid rgba(255,133,161,0.25);
+  background: rgba(255,255,255,0.7);
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800;
+  color: var(--text); cursor: pointer; transition: all 0.2s;
+}
+.pill.active {
+  background: linear-gradient(135deg, var(--pink), #e899ff);
+  color: white; border-color: transparent;
+  box-shadow: 0 4px 12px rgba(255,133,161,0.4);
+}
+
+/* ── INPUTS ── */
+.input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.input-row input {
+  flex-grow: 1; padding: 12px 16px; border-radius: 16px;
+  border: 1.5px solid rgba(255,255,255,0.9);
+  background: var(--glass-strong);
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--text); outline: none;
+}
+.input-row input:focus { border-color: var(--pink); }
+.btn-add {
+  background: var(--text); color: white; border: none;
+  padding: 0 18px; border-radius: 16px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+  cursor: pointer; white-space: nowrap; transition: transform 0.1s;
+}
+.btn-add:active { transform: scale(0.96); }
+.btn-add.pink {
+  background: linear-gradient(135deg, var(--pink), #e080ff);
+  box-shadow: 0 4px 14px rgba(255,133,161,0.35);
+}
+
+/* ── DISPLAY BOX ── */
+.affirmation-display {
+  background: var(--glass-strong);
+  min-height: 120px; border-radius: 22px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px;
+  font-family: 'Playfair Display', serif;
+  font-size: 21px; font-weight: 700; color: var(--text);
+  text-align: center; line-height: 1.4;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,1);
+  position: relative; overflow: hidden;
+  transition: transform 0.15s;
+}
+.affirmation-display::before { content: '✦'; position: absolute; top: 10px; left: 14px; font-size: 10px; color: var(--pink); opacity: 0.5; }
+.affirmation-display::after { content: '✦'; position: absolute; bottom: 10px; right: 14px; font-size: 10px; color: var(--blue-deep); opacity: 0.5; }
+.affirmation-display.speaking { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(255,133,161,0.2); }
+
+/* TTS BAR */
+.tts-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.6); border-radius: 16px;
+  padding: 10px 14px; margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,0.7);
+}
+.tts-toggle {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  font-size: 12px; font-weight: 800; color: var(--text); flex-grow: 1;
+}
+.tts-switch {
+  width: 38px; height: 22px; border-radius: 11px;
+  background: rgba(200,200,220,0.4); position: relative;
+  transition: background 0.25s; flex-shrink: 0;
+}
+.tts-switch.on { background: linear-gradient(135deg, var(--pink), #c97fff); }
+.tts-switch::after {
+  content: ''; position: absolute; left: 3px; top: 3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: white; transition: left 0.25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.tts-switch.on::after { left: 19px; }
+.tts-wave { display: none; align-items: center; gap: 2px; }
+.tts-wave.active { display: flex; }
+.tts-wave span {
+  display: block; width: 3px; border-radius: 3px;
+  background: var(--pink); animation: wave 0.8s ease-in-out infinite;
+}
+.tts-wave span:nth-child(1){ height: 8px; animation-delay: 0s; }
+.tts-wave span:nth-child(2){ height: 14px; animation-delay: 0.15s; }
+.tts-wave span:nth-child(3){ height: 10px; animation-delay: 0.3s; }
+.tts-wave span:nth-child(4){ height: 6px; animation-delay: 0.45s; }
+@keyframes wave { 0%,100%{transform:scaleY(0.5)} 50%{transform:scaleY(1.4)} }
+.tts-voice-select {
+  padding: 6px 10px; border-radius: 12px;
+  border: 1.5px solid rgba(255,133,161,0.2);
+  background: rgba(255,255,255,0.8);
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+  color: var(--text); outline: none; cursor: pointer;
+}
+
+/* ── STREAK ── */
+.streak-banner {
+  background: linear-gradient(135deg, rgba(255,133,161,0.12), rgba(179,111,255,0.12));
+  border: 1px solid rgba(255,133,161,0.2);
+  border-radius: 18px; padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+}
+.streak-fire { font-size: 32px; flex-shrink: 0; }
+.streak-info { flex-grow: 1; }
+.streak-num {
+  font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900;
+  background: linear-gradient(135deg, #ff6b35, var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1;
+}
+.streak-label { font-size: 11px; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px; }
+.streak-goal { font-size: 12px; color: var(--text); font-weight: 700; margin-top: 4px; }
+.streak-goal-input {
+  display: flex; align-items: center; gap: 8px; margin-top: 8px;
+}
+.streak-goal-input input {
+  width: 60px; padding: 6px 10px; border-radius: 10px;
+  border: 1.5px solid rgba(255,133,161,0.3);
+  background: rgba(255,255,255,0.8);
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  color: var(--text); outline: none; text-align: center;
+}
+.streak-goal-input span { font-size: 11px; color: var(--text-soft); font-weight: 700; }
+
+/* ── STATS ── */
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.stat-box { background: rgba(255,255,255,0.8); border-radius: 18px; padding: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.7); }
+.stat-val {
+  font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900;
+  background: linear-gradient(135deg, var(--pink), #b36fff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stat-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-soft); margin-top: 4px; }
+
+/* ── PROGRESS BAR ── */
+.prog-wrap { height: 8px; background: rgba(255,255,255,0.5); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--blue-deep)); border-radius: 8px; transition: width 0.4s ease; }
+
+/* ── SPEED ── */
+.speed-row {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.5); padding: 10px 16px;
+  border-radius: 14px; margin-bottom: 14px;
+  font-size: 12px; font-weight: 800; color: var(--text);
+}
+input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; }
+
+/* ── MAIN BUTTON ── */
+.main-btn {
+  background: linear-gradient(135deg, var(--pink), #c97fff);
+  color: white; border: none; padding: 17px 0; width: 100%;
+  border-radius: 20px; font-family: 'Nunito', sans-serif;
+  font-size: 16px; font-weight: 900; letter-spacing: 1px;
+  cursor: pointer; box-shadow: 0 8px 24px rgba(255,133,161,0.35);
+  margin-bottom: 10px; transition: transform 0.1s, box-shadow 0.1s;
+}
+.main-btn:active { transform: scale(0.98); box-shadow: 0 4px 12px rgba(255,133,161,0.25); }
+.hint { font-size: 11px; color: var(--text-soft); text-align: center; margin-bottom: 14px; }
+
+/* ── SECONDARY BTNS ── */
+.sec-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-sec {
+  padding: 12px; border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.05);
+  background: rgba(255,255,255,0.8); color: var(--text);
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 12px;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-sec:hover { background: rgba(255,255,255,0.95); }
+.btn-sec.danger { color: #ff4757; }
+.btn-sec.active-auto { background: var(--text); color: white; }
+
+/* ── TIMER ── */
+.affirm-timer-bar {
+  background: rgba(255,255,255,0.8); border-radius: 18px;
+  padding: 14px 16px; margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,0.7);
+}
+.affirm-timer-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.affirm-timer-title { font-size: 12px; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1.5px; }
+.affirm-timer-display {
+  font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900;
+  background: linear-gradient(90deg, var(--pink), #b36fff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.affirm-timer-btns { display: flex; gap: 8px; }
+.atbtn { flex: 1; padding: 9px 0; border-radius: 12px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 12px; cursor: pointer; transition: transform 0.1s; }
+.atbtn:active { transform: scale(0.96); }
+.atbtn-start { background: linear-gradient(135deg, var(--pink), #c97fff); color: white; }
+.atbtn-reset { background: rgba(255,255,255,0.9); color: var(--text); border: 1px solid rgba(0,0,0,0.06); }
+.affirm-timer-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.atpreset { padding: 5px 12px; border-radius: 12px; border: 1.5px solid rgba(255,133,161,0.25); background: rgba(255,255,255,0.6); font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800; color: var(--text); cursor: pointer; transition: all 0.2s; }
+.atpreset.active { background: var(--pink); color: white; border-color: var(--pink); }
+.timer-session-card {
+  background: linear-gradient(135deg, rgba(255,133,161,0.15), rgba(179,111,255,0.15));
+  border-radius: 16px; padding: 12px 16px; margin-top: 10px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 700; color: var(--text);
+  border: 1px solid rgba(255,133,161,0.2);
+}
+.timer-session-icon { font-size: 20px; }
+
+/* ── RECORDATORIOS ── */
+.reminder-item {
+  background: rgba(255,255,255,0.85); border-radius: 16px;
+  padding: 14px 16px; margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.7);
+  display: flex; align-items: center; gap: 12px;
+}
+.reminder-item.paused { opacity: 0.55; }
+.reminder-body { flex-grow: 1; }
+.reminder-time { font-size: 22px; font-weight: 900; font-family: 'Playfair Display', serif; color: var(--text); line-height: 1; }
+.reminder-msg { font-size: 13px; font-weight: 700; color: var(--text); margin-top: 4px; max-width: 180px; }
+.reminder-msg-input { font-size: 13px; font-weight: 700; color: var(--text); border: none; background: transparent; outline: none; width: 100%; font-family: 'Nunito', sans-serif; }
+.reminder-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.rem-btn { padding: 6px 12px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 11px; cursor: pointer; }
+.rem-btn-pause { background: rgba(255,255,255,0.9); color: var(--text); border: 1px solid rgba(0,0,0,0.08); }
+.rem-btn-del { background: rgba(255,71,87,0.1); color: #ff4757; }
+.reminder-days { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.rem-day { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(255,133,161,0.25); background: rgba(255,133,161,0.06); font-size: 9px; font-weight: 900; color: #bbb; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+.rem-day.on { background: linear-gradient(135deg, var(--pink), #c97fff); border-color: transparent; color: white; }
+.add-reminder-form {
+  background: rgba(255,255,255,0.7); border-radius: 18px;
+  padding: 16px; margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,0.8);
+}
+.add-reminder-form input[type="time"], .add-reminder-form input[type="text"] {
+  padding: 10px 14px; border-radius: 14px;
+  border: 1.5px solid rgba(255,133,161,0.2);
+  background: rgba(255,255,255,0.9);
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--text); outline: none; width: 100%; margin-bottom: 10px;
+}
+.add-reminder-form input[type="time"]:focus,
+.add-reminder-form input[type="text"]:focus { border-color: var(--pink); }
+.days-picker { display: flex; gap: 6px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
+.day-pick { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(255,133,161,0.25); background: rgba(255,133,161,0.06); font-size: 9px; font-weight: 900; color: #bbb; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+.day-pick.on { background: linear-gradient(135deg, var(--pink), #c97fff); border-color: transparent; color: white; }
+.reminder-empty { text-align: center; padding: 20px; color: var(--text-soft); font-size: 14px; }
+
+/* ── HISTORIAL ── */
+.history-list { max-height: 380px; overflow-y: auto; }
+.history-day-group { margin-bottom: 18px; }
+.history-day-label { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: var(--text-soft); margin-bottom: 8px; padding-left: 4px; }
+.history-item { background: rgba(255,255,255,0.85); border-radius: 14px; padding: 12px 15px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: flex-start; gap: 12px; }
+.history-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.history-body { flex-grow: 1; }
+.history-cat { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--pink); margin-bottom: 3px; }
+.history-phrase { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--text); line-height: 1.4; margin-bottom: 4px; }
+.history-meta { font-size: 11px; color: var(--text-soft); font-weight: 700; }
+.history-empty { text-align: center; padding: 30px; color: var(--text-soft); font-size: 14px; }
+
+/* ── HÁBITOS ── */
+.week-nav { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.6); padding: 8px 14px; border-radius: 14px; margin-bottom: 14px; }
+.week-nav-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text); padding: 4px 8px; border-radius: 10px; transition: background 0.2s; }
+.week-nav-btn:hover { background: rgba(255,133,161,0.15); }
+.week-nav-label { font-size: 12px; font-weight: 800; color: var(--text); }
+.habit-row { background: rgba(255,255,255,0.85); border-radius: 18px; padding: 14px 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.7); }
+.habit-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.habit-name { font-size: 14px; font-weight: 800; color: var(--text); flex-grow: 1; }
+.habit-del { background: none; border: none; font-size: 14px; color: #ccc; cursor: pointer; padding: 3px 7px; border-radius: 8px; transition: color 0.2s; flex-shrink: 0; }
+.habit-del:hover { color: #ff4757; background: rgba(255,71,87,0.08); }
+.habit-days { display: flex; gap: 5px; justify-content: space-between; }
+.day-dot { flex: 1; max-width: 38px; aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(255,133,161,0.2); background: rgba(255,133,161,0.06); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; color: #bbb; cursor: pointer; transition: all 0.2s; text-transform: uppercase; position: relative; }
+.day-dot.done { background: linear-gradient(135deg, var(--pink), #c97fff); border-color: transparent; color: white; box-shadow: 0 3px 10px rgba(255,133,161,0.4); }
+.day-dot.is-today { border-color: var(--blue-deep); }
+.day-dot.is-today::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--blue-deep); }
+.habit-prog { margin-top: 8px; height: 3px; background: rgba(255,133,161,0.12); border-radius: 4px; overflow: hidden; }
+.habit-prog-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--blue-deep)); border-radius: 4px; transition: width 0.4s; }
+.habits-summary { background: rgba(255,255,255,0.6); border-radius: 16px; padding: 14px; display: flex; justify-content: space-around; text-align: center; margin-top: 14px; }
+.sum-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; background: linear-gradient(135deg, var(--pink), #b36fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.sum-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); margin-top: 3px; }
+
+/* ── TAREAS ── */
+.task-item { background: rgba(255,255,255,0.85); border-radius: 16px; padding: 13px 15px; margin-bottom: 9px; border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: center; gap: 12px; transition: opacity 0.3s; }
+.task-item.done { opacity: 0.55; }
+.task-checkbox { width: 24px; height: 24px; border-radius: 50%; border: 2.5px solid rgba(255,133,161,0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.25s; background: rgba(255,133,161,0.05); }
+.task-checkbox.checked { background: linear-gradient(135deg, var(--pink), #c97fff); border-color: transparent; box-shadow: 0 3px 10px rgba(255,133,161,0.4); }
+.task-checkbox.checked::after { content: '✓'; color: white; font-size: 12px; font-weight: 900; }
+.task-text { flex-grow: 1; font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.task-item.done .task-text { text-decoration: line-through; color: var(--text-soft); }
+.task-del { background: none; border: none; font-size: 13px; color: #ccc; cursor: pointer; padding: 3px 6px; border-radius: 8px; transition: color 0.2s; flex-shrink: 0; }
+.task-del:hover { color: #ff4757; }
+.task-filters { display: flex; gap: 6px; margin-bottom: 14px; }
+.task-filter-btn { padding: 6px 14px; border-radius: 12px; border: 1.5px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.7); font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800; color: var(--text-soft); cursor: pointer; transition: all 0.2s; }
+.task-filter-btn.active { background: var(--text); color: white; border-color: transparent; }
+.task-empty { text-align: center; padding: 30px 20px; color: var(--text-soft); font-size: 14px; }
+.task-counter { font-size: 11px; color: var(--text-soft); font-weight: 800; text-align: right; margin-bottom: 10px; }
+.task-priority { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.priority-high { background: #ff6b81; }
+.priority-med { background: #ffd166; }
+.priority-low { background: var(--mint); }
+.priority-select { padding: 10px 12px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.9); background: var(--glass-strong); font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); outline: none; width: 100px; flex-shrink: 0; }
+
+/* ── MODAL ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(60,40,80,0.4); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+.modal-box { background: var(--glass); border: 1px solid rgba(255,255,255,0.9); padding: 26px; border-radius: 26px; width: 100%; max-width: 400px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(100,60,120,0.2); }
+.modal-list { overflow-y: auto; flex-grow: 1; margin: 14px 0; }
+.modal-item { display: flex; justify-content: space-between; align-items: center; padding: 11px 8px; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 13px; color: var(--text); font-weight: 600; }
+.btn-del-sm { background: #ff4757; color: white; border: none; padding: 5px 11px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 800; margin-left: 10px; flex-shrink: 0; }
+
+/* ── NOTIFICATION TOAST ── */
+#notif-toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: linear-gradient(135deg, var(--pink), #c97fff);
+  color: white; padding: 14px 24px; border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
+  box-shadow: 0 8px 30px rgba(255,133,161,0.4); z-index: 2000;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap; max-width: 90vw; text-align: center;
+}
+#notif-toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 460px) {
+  .card { padding: 20px 16px; }
+  .affirmation-display { font-size: 18px; min-height: 100px; padding: 18px; }
+  .stat-val { font-size: 20px; }
+  .sec-btns { grid-template-columns: 1fr; }
+  .day-dot { font-size: 8px; }
+  .tab-btn { font-size: 11px; padding: 8px 10px; }
+  .input-row { flex-direction: column; }
+  .btn-add { padding: 12px; }
+  .priority-select { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOCK SCREEN ══════════════════ -->
+<div id="lock-screen">
+  <div class="lock-logo">Celeste ✨</div>
+  <div class="lock-sub">Tu universo de afirmaciones</div>
+  <div class="lock-card">
+    <div class="lock-flowers">🌸 🌷 🌸</div>
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">Espacio Sagrado</div>
+    <div class="lock-hint">Ingresá tu frase secreta para entrar</div>
+    <input type="password" class="lock-input" id="lock-input" placeholder="••••••••••••••••" onkeypress="if(event.key==='Enter')checkPassword()">
+    <button class="lock-btn" onclick="checkPassword()">Entrar ✨</button>
+    <div class="lock-error" id="lock-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ MAIN APP ══════════════════ -->
+<div id="main-app" style="display:none">
+
+<button class="lock-exit-btn" onclick="lockApp()" title="Bloquear">🔒 Bloquear</button>
+
+<div class="app-header">
+  <div class="app-title">Celeste ✨</div>
+  <div class="app-subtitle">Tu universo de afirmaciones</div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('afirm', this)">✨ Afirmaciones</button>
+  <button class="tab-btn" onclick="switchTab('historial', this)">📖 Historial</button>
+  <button class="tab-btn" onclick="switchTab('habitos', this)">🌿 Hábitos</button>
+  <button class="tab-btn" onclick="switchTab('tareas', this)">✅ Tareas</button>
+  <button class="tab-btn" onclick="switchTab('recordatorios', this)">🔔 Recordatorios</button>
+</div>
+
+<!-- ══════════════════ AFIRMACIONES ══════════════════ -->
+<div class="tab-panel active" id="tab-afirm">
+  <div class="card">
+    <div class="pills-row" id="pills"></div>
+    <div class="input-row">
+      <input type="text" id="new-cat-input" placeholder="Nueva categoría..." onkeypress="if(event.key==='Enter')addCategory()">
+      <button class="btn-add" onclick="addCategory()">Crear</button>
+    </div>
+
+    <!-- RACHA DE DÍAS -->
+    <div class="streak-banner" id="streak-banner">
+      <div class="streak-fire" id="streak-fire">🔥</div>
+      <div class="streak-info">
+        <div class="streak-num" id="streak-num">0</div>
+        <div class="streak-label">Días seguidos</div>
+        <div class="streak-goal" id="streak-goal-text">Meta: <span id="streak-goal-val">10</span> afirmaciones/día</div>
+        <div class="streak-goal-input">
+          <input type="number" id="daily-goal-input" value="10" min="1" max="1000" onchange="saveDailyGoal()" style="">
+          <span>afirmaciones por día</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="affirmation-display" id="affirmation-display">Presioná "Siguiente" 🌸</div>
+
+    <!-- TTS BAR -->
+    <div class="tts-bar">
+      <div class="tts-toggle" onclick="toggleTTS()">
+        <div class="tts-switch" id="tts-switch"></div>
+        <span>Leer en voz alta</span>
+      </div>
+      <div class="tts-wave" id="tts-wave">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <select class="tts-voice-select" id="tts-voice-select" onchange="onVoiceChange()">
+        <option value="">Voz...</option>
+      </select>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" id="count-session">0</div>
+        <div class="stat-lbl">Esta Sesión</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="count-total">0</div>
+        <div class="stat-lbl">Objetivo / 10.000</div>
+      </div>
+    </div>
+
+    <div class="prog-wrap"><div class="prog-fill" id="progress-fill" style="width:0%"></div></div>
+
+    <!-- TIMER -->
+    <div class="affirm-timer-bar">
+      <div class="affirm-timer-top">
+        <span class="affirm-timer-title">⏱ Timer</span>
+        <span class="affirm-timer-display" id="at-display">05:00</span>
+      </div>
+      <div class="affirm-timer-btns">
+        <button class="atbtn atbtn-start" id="at-start-btn" onclick="toggleAffirmTimer()">▶ Iniciar</button>
+        <button class="atbtn atbtn-reset" onclick="resetAffirmTimer()">↺ Reiniciar</button>
+      </div>
+      <div class="affirm-timer-presets">
+        <button class="atpreset active" onclick="setAffirmPreset(5,this)">5 min</button>
+        <button class="atpreset" onclick="setAffirmPreset(10,this)">10 min</button>
+        <button class="atpreset" onclick="setAffirmPreset(15,this)">15 min</button>
+        <button class="atpreset" onclick="setAffirmPreset(20,this)">20 min</button>
+        <button class="atpreset" onclick="setAffirmPreset(25,this)">25 🍅</button>
+        <button class="atpreset" onclick="setAffirmPreset(30,this)">30 min</button>
+      </div>
+      <div class="timer-session-card" id="at-session-card" style="display:none">
+        <span class="timer-session-icon">🌸</span>
+        <div>
+          <div id="at-session-text" style="font-size:13px;font-weight:700;color:var(--text)">0 min afirmando hoy</div>
+          <div style="font-size:11px;color:var(--text-soft);font-weight:700">en "<span id="at-session-cat"></span>"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speed-row">
+      <span id="speed-label-prefix">Velocidad:</span>
+      <input type="range" id="speed-slider" min="0.5" max="5" step="0.1" value="1.5" oninput="updateSpeedLabel()">
+      <span id="speed-label">1.5s</span>
+    </div>
+
+    <div class="input-row">
+      <input type="text" id="new-phrase" placeholder="Agregá tu afirmación..." onkeypress="if(event.key==='Enter')addAffirmation()">
+      <button class="btn-add pink" onclick="addAffirmation()">Agregar</button>
+    </div>
+
+    <button class="main-btn" onclick="nextAffirmation()">SIGUIENTE AFIRMACIÓN</button>
+    <div class="hint">💡 Enter o ↑ en compu para avanzar</div>
+
+    <div class="sec-btns">
+      <button class="btn-sec" id="btn-auto" onclick="toggleAuto()">🤖 Modo Robótico</button>
+      <button class="btn-sec" onclick="openManager()">📝 Ver/Quitar Frases</button>
+      <button class="btn-sec" onclick="resetTotal()">↺ Reiniciar Progreso</button>
+      <button class="btn-sec danger" onclick="deleteCurrentCategory()">🗑 Borrar Categoría</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ HISTORIAL ══════════════════ -->
+<div class="tab-panel" id="tab-historial">
+  <div class="card">
+    <div class="section-title">📖 Historial de Afirmaciones</div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ HÁBITOS ══════════════════ -->
+<div class="tab-panel" id="tab-habitos">
+  <div class="card">
+    <div class="section-title">🌿 Mis Hábitos</div>
+    <div class="week-nav">
+      <button class="week-nav-btn" onclick="changeWeek(-1)">‹</button>
+      <span class="week-nav-label" id="week-label">Esta semana</span>
+      <button class="week-nav-btn" onclick="changeWeek(1)">›</button>
+    </div>
+    <div class="input-row">
+      <input type="text" id="new-habit" placeholder="Ej: Meditar, Leer, Agua..." onkeypress="if(event.key==='Enter')addHabit()">
+      <button class="btn-add pink" onclick="addHabit()">+ Agregar</button>
+    </div>
+    <div id="habits-list"></div>
+    <div class="habits-summary">
+      <div><div class="sum-val" id="sum-today">0</div><div class="sum-lbl">Hoy</div></div>
+      <div><div class="sum-val" id="sum-streak">0</div><div class="sum-lbl">Racha días</div></div>
+      <div><div class="sum-val" id="sum-week">0%</div><div class="sum-lbl">Esta semana</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ TAREAS ══════════════════ -->
+<div class="tab-panel" id="tab-tareas">
+  <div class="card">
+    <div class="section-title">✅ Lista de Tareas</div>
+    <div class="input-row">
+      <input type="text" id="new-task" placeholder="Nueva tarea..." onkeypress="if(event.key==='Enter')addTask()">
+      <select class="priority-select" id="task-priority">
+        <option value="high">🔴 Alta</option>
+        <option value="med" selected>🟡 Media</option>
+        <option value="low">🟢 Baja</option>
+      </select>
+    </div>
+    <div style="text-align:right;margin-bottom:4px;">
+      <button class="btn-add pink" onclick="addTask()" style="padding:10px 20px;">+ Agregar</button>
+    </div>
+    <div class="task-filters" style="margin-top:10px;">
+      <button class="task-filter-btn active" onclick="setTaskFilter('all',this)">Todas</button>
+      <button class="task-filter-btn" onclick="setTaskFilter('pending',this)">Pendientes</button>
+      <button class="task-filter-btn" onclick="setTaskFilter('done',this)">Completadas</button>
+    </div>
+    <div class="task-counter" id="task-counter"></div>
+    <div id="tasks-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ RECORDATORIOS ══════════════════ -->
+<div class="tab-panel" id="tab-recordatorios">
+  <div class="card">
+    <div class="section-title">🔔 Recordatorios</div>
+
+    <div class="add-reminder-form">
+      <div style="font-size:12px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">Nuevo recordatorio</div>
+      <input type="time" id="rem-time" style="">
+      <input type="text" id="rem-msg" placeholder="Mensaje: ej. ¡Momento de afirmar! 🌸" style="">
+      <div class="days-picker" id="days-picker">
+        <div class="day-pick on" data-day="0">Dom</div>
+        <div class="day-pick on" data-day="1">Lun</div>
+        <div class="day-pick on" data-day="2">Mar</div>
+        <div class="day-pick on" data-day="3">Mié</div>
+        <div class="day-pick on" data-day="4">Jue</div>
+        <div class="day-pick on" data-day="5">Vie</div>
+        <div class="day-pick on" data-day="6">Sáb</div>
+      </div>
+      <button class="btn-add pink" onclick="addReminder()" style="width:100%;padding:12px;">+ Agregar Recordatorio</button>
+    </div>
+
+    <div style="background:rgba(255,213,90,0.12);border:1px solid rgba(255,213,90,0.3);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:12px;font-weight:700;color:var(--text)">
+      ⚠️ <strong>Importante:</strong> Para que los recordatorios funcionen, esta página debe estar abierta en el navegador. Aceptá los permisos de notificación si el navegador los pide.
+    </div>
+
+    <div id="reminders-list"></div>
+  </div>
+</div>
+
+</div><!-- end main-app -->
+
+<!-- MODAL FRASES -->
+<div id="manager-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="section-title">Frases de <span id="modal-cat-name" style="color:var(--pink)"></span></div>
+    <div id="phrase-list" class="modal-list"></div>
+    <button class="main-btn" style="padding:13px;font-size:14px;margin-bottom:0" onclick="closeManager()">Hecho ✓</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="notif-toast"></div>
+
+<script>
+// ─────────────────────────── PASSWORD ───────────────────────────
+const PASSWORD = 'todoesmaravilloso';
+
+function checkPassword() {
+  const inp = document.getElementById('lock-input');
+  const err = document.getElementById('lock-error');
+  if (inp.value.toLowerCase().trim() === PASSWORD) {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'flex';
+    document.getElementById('main-app').style.flexDirection = 'column';
+    document.getElementById('main-app').style.alignItems = 'center';
+    document.getElementById('main-app').style.width = '100%';
+    inp.value = '';
+    err.innerText = '';
+    initApp();
+  } else {
+    inp.classList.add('shake');
+    err.innerText = 'Frase incorrecta. Intentá de nuevo 💭';
+    setTimeout(() => inp.classList.remove('shake'), 500);
+    inp.value = '';
+  }
+}
+
+function lockApp() {
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  stopTTS();
+  if (autoMode) toggleAuto();
+  if (atRunning) { clearInterval(atInterval); atRunning = false; document.getElementById('at-start-btn').innerText = '▶ Iniciar'; }
+}
+
+document.getElementById('lock-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') checkPassword();
+});
+
+// ─────────────────────────── TABS ───────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'habitos') renderHabits();
+  if (name === 'historial') renderHistory();
+  if (name === 'tareas') renderTasks();
+  if (name === 'recordatorios') renderReminders();
+}
+
+// ─────────────────────────── UTILS ───────────────────────────
+function dateKey(d) { return d.toISOString().slice(0, 10); }
+const today = dateKey(new Date());
+
+function showToast(msg) {
+  const t = document.getElementById('notif-toast');
+  t.innerText = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─────────────────────────── TTS ───────────────────────────
+let ttsEnabled = false;
+let ttsVoices = [];
+let selectedVoice = null;
+let currentUtterance = null;
+
+function loadVoices() {
+  ttsVoices = speechSynthesis.getVoices();
+  const sel = document.getElementById('tts-voice-select');
+  sel.innerHTML = '<option value="">Voz automática</option>';
+  // Priorizar voces en español
+  const spanishVoices = ttsVoices.filter(v => v.lang.startsWith('es'));
+  const otherVoices = ttsVoices.filter(v => !v.lang.startsWith('es'));
+  const sorted = [...spanishVoices, ...otherVoices];
+  sorted.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.dataset.voiceName = v.name;
+    opt.innerText = (v.lang.startsWith('es') ? '🇦🇷 ' : '') + v.name.substring(0, 22);
+    sel.appendChild(opt);
+  });
+  // Intentar seleccionar voz española femenina por defecto
+  const preferred = spanishVoices.find(v => /female|mujer|femenin|rosa|lucia|elena|sofia|valentina/i.test(v.name))
+    || spanishVoices.find(v => v.default)
+    || spanishVoices[0];
+  if (preferred) {
+    const idx = sorted.indexOf(preferred);
+    sel.value = idx;
+    selectedVoice = preferred;
+  }
+}
+
+window.speechSynthesis.onvoiceschanged = loadVoices;
+setTimeout(loadVoices, 500);
+
+function onVoiceChange() {
+  const sel = document.getElementById('tts-voice-select');
+  const val = sel.value;
+  if (val === '') { selectedVoice = null; return; }
+  const spanishVoices = ttsVoices.filter(v => v.lang.startsWith('es'));
+  const otherVoices = ttsVoices.filter(v => !v.lang.startsWith('es'));
+  const sorted = [...spanishVoices, ...otherVoices];
+  selectedVoice = sorted[parseInt(val)] || null;
+}
+
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  const sw = document.getElementById('tts-switch');
+  sw.classList.toggle('on', ttsEnabled);
+  if (!ttsEnabled) stopTTS();
+  updateSpeedLabel(); // actualiza el label del slider
+}
+
+function stopTTS() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  document.getElementById('tts-wave').classList.remove('active');
+  document.getElementById('affirmation-display').classList.remove('speaking');
+  currentUtterance = null;
+}
+
+function getTTSRate() {
+  // Slider va de 0.5s a 5s → lo mapeamos a rate 2.0x–0.6x (más rápido = intervalo más corto)
+  const v = parseFloat(document.getElementById('speed-slider').value);
+  // 0.5s → rate 2.0 | 1.5s → rate 1.1 | 3s → rate 0.85 | 5s → rate 0.6
+  const rate = Math.max(0.6, Math.min(2.0, 2.4 - (v * 0.28)));
+  return parseFloat(rate.toFixed(2));
+}
+
+function speakText(text, onFinished) {
+  if (!ttsEnabled || !window.speechSynthesis) {
+    if (onFinished) onFinished();
+    return;
+  }
+  stopTTS();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'es-AR';
+  utter.rate = getTTSRate();
+  utter.pitch = 1.05;
+  if (selectedVoice) utter.voice = selectedVoice;
+  utter.onstart = () => {
+    document.getElementById('tts-wave').classList.add('active');
+    document.getElementById('affirmation-display').classList.add('speaking');
+  };
+  utter.onend = () => {
+    document.getElementById('tts-wave').classList.remove('active');
+    document.getElementById('affirmation-display').classList.remove('speaking');
+    if (onFinished) onFinished();
+  };
+  utter.onerror = () => {
+    document.getElementById('tts-wave').classList.remove('active');
+    document.getElementById('affirmation-display').classList.remove('speaking');
+    if (onFinished) onFinished();
+  };
+  currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+// ─────────────────────────── STREAK ───────────────────────────
+function getDailyGoal() { return parseInt(localStorage.getItem('celeste_daily_goal')) || 10; }
+function saveDailyGoal() {
+  const v = parseInt(document.getElementById('daily-goal-input').value) || 10;
+  localStorage.setItem('celeste_daily_goal', v);
+  document.getElementById('streak-goal-val').innerText = v;
+  updateStreak();
+}
+
+function getDailyCount(cat, dateStr) {
+  return parseInt(localStorage.getItem('celeste_daily_' + cat + '_' + dateStr)) || 0;
+}
+function incDailyCount(cat) {
+  const key = 'celeste_daily_' + cat + '_' + today;
+  const prev = parseInt(localStorage.getItem(key)) || 0;
+  localStorage.setItem(key, prev + 1);
+}
+
+function getStreak() {
+  const goal = getDailyGoal();
+  const cats = Object.keys(myData);
+  if (!cats.length) return 0;
+  let streak = 0;
+  const d = new Date();
+  for (let i = 0; i < 365; i++) {
+    const ds = dateKey(d);
+    // Meta cumplida si la suma de todas las categorías del día >= goal
+    const totalThatDay = cats.reduce((sum, cat) => sum + getDailyCount(cat, ds), 0);
+    if (totalThatDay >= goal) { streak++; d.setDate(d.getDate() - 1); }
+    else if (i === 0) { d.setDate(d.getDate() - 1); } // hoy no cuenta aún
+    else break;
+  }
+  return streak;
+}
+
+function updateStreak() {
+  const s = getStreak();
+  document.getElementById('streak-num').innerText = s;
+  const fire = document.getElementById('streak-fire');
+  if (s === 0) fire.innerText = '🌱';
+  else if (s < 3) fire.innerText = '✨';
+  else if (s < 7) fire.innerText = '🔥';
+  else if (s < 30) fire.innerText = '🔥🔥';
+  else fire.innerText = '💫🔥💫';
+  const goal = getDailyGoal();
+  document.getElementById('streak-goal-val').innerText = goal;
+  document.getElementById('daily-goal-input').value = goal;
+}
+
+// ─────────────────────────── AFIRMACIONES ───────────────────────────
+const GOAL = 10000;
+const defaultData = {
+  'Amor': ['Soy amada incondicionalmente', 'El amor fluye hacia mí naturalmente'],
+  'Dinero': ['El dinero fluye hacia mí con facilidad', 'Soy un imán para la abundancia'],
+  'Salud': ['Mi cuerpo es fuerte y sano', 'Cada día me siento mejor'],
+  'SP': ['Él solo piensa en mí']
+};
+
+let myData = {};
+let currentCat = '';
+let autoMode = false;
+let autoTimer;
+let sessionCount = 0;
+
+function getTotal(cat) { return parseInt(localStorage.getItem('matepi_total_' + cat)) || 0; }
+function saveTotal(cat, v) { localStorage.setItem('matepi_total_' + cat, v); }
+
+function updateUI() {
+  document.getElementById('count-session').innerText = sessionCount;
+  const total = getTotal(currentCat);
+  document.getElementById('count-total').innerText = total.toLocaleString() + ' / 10.000';
+  const pct = Math.min((total / GOAL) * 100, 100);
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = pct + '%';
+  fill.style.background = pct >= 100 ? 'linear-gradient(90deg,#a8e063,#56ccf2)' : 'linear-gradient(90deg,var(--pink),var(--blue-deep))';
+  updateStreak();
+}
+
+function renderPills() {
+  const c = document.getElementById('pills');
+  c.innerHTML = '';
+  Object.keys(myData).forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'pill' + (cat === currentCat ? ' active' : '');
+    b.innerText = cat;
+    b.onclick = () => {
+      currentCat = cat; sessionCount = 0; renderPills(); updateUI(); updateTimerSessionCard();
+      const phrases = myData[cat];
+      document.getElementById('affirmation-display').innerText = phrases.length ? phrases[0] : 'Agregá afirmaciones...';
+    };
+    c.appendChild(b);
+  });
+}
+
+function addCategory() {
+  const inp = document.getElementById('new-cat-input');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (myData[name]) { alert('Esa categoría ya existe.'); return; }
+  myData[name] = [];
+  localStorage.setItem('matepi_phrases', JSON.stringify(myData));
+  currentCat = name; sessionCount = 0; inp.value = '';
+  renderPills(); updateUI();
+  document.getElementById('affirmation-display').innerText = 'Agregá tu primera afirmación ✨';
+}
+
+function deleteCurrentCategory() {
+  if (Object.keys(myData).length <= 1) { alert('No podés borrar la única categoría.'); return; }
+  if (!confirm('¿Borrar "' + currentCat + '" y todo su progreso?')) return;
+  delete myData[currentCat];
+  localStorage.removeItem('matepi_total_' + currentCat);
+  localStorage.setItem('matepi_phrases', JSON.stringify(myData));
+  currentCat = Object.keys(myData)[0]; sessionCount = 0;
+  renderPills(); updateUI();
+  document.getElementById('affirmation-display').innerText = myData[currentCat][0] || 'Agregá afirmaciones...';
+}
+
+function nextAffirmation() {
+  const phrases = myData[currentCat];
+  if (!phrases.length) { document.getElementById('affirmation-display').innerText = '¡Categoría vacía! Agregá una frase.'; return; }
+  const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('affirmation-display').innerText = phrase;
+  sessionCount++;
+  saveTotal(currentCat, getTotal(currentCat) + 1);
+  incDailyCount(currentCat);
+  updateUI();
+  saveHistoryEntry(currentCat, phrase);
+
+  if (autoMode && ttsEnabled) {
+    // Con TTS en auto: habla y cuando termina programa la siguiente
+    speakText(phrase, () => {
+      if (!autoMode) return;
+      // Pequeña pausa entre afirmaciones (300ms) para que no sea abrupto
+      autoTimer = setTimeout(() => { if (autoMode) nextAffirmation(); }, 300);
+    });
+  } else if (autoMode && !ttsEnabled) {
+    // Sin TTS: el intervalo ya está corriendo, solo habla normalmente
+    speakText(phrase);
+  } else {
+    // Manual: habla y listo
+    speakText(phrase);
+  }
+}
+
+function addAffirmation() {
+  const inp = document.getElementById('new-phrase');
+  const phrase = inp.value.trim();
+  if (!phrase) return;
+  myData[currentCat].push(phrase);
+  localStorage.setItem('matepi_phrases', JSON.stringify(myData));
+  inp.value = '';
+  document.getElementById('affirmation-display').innerText = phrase;
+}
+
+function openManager() {
+  document.getElementById('manager-modal').style.display = 'flex';
+  document.getElementById('modal-cat-name').innerText = currentCat;
+  renderPhraseList();
+}
+function closeManager() { document.getElementById('manager-modal').style.display = 'none'; }
+
+function renderPhraseList() {
+  const list = document.getElementById('phrase-list');
+  list.innerHTML = '';
+  if (!myData[currentCat].length) { list.innerHTML = '<p style="color:var(--text-soft);text-align:center;padding:20px">No hay frases.</p>'; return; }
+  myData[currentCat].forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'modal-item';
+    div.innerHTML = '<span style="flex-grow:1;padding-right:8px;line-height:1.4">' + p + '</span><button class="btn-del-sm" onclick="deleteAffirmation(' + i + ')">Quitar</button>';
+    list.appendChild(div);
+  });
+}
+
+function deleteAffirmation(i) {
+  if (!confirm('¿Quitar esta afirmación?')) return;
+  myData[currentCat].splice(i, 1);
+  localStorage.setItem('matepi_phrases', JSON.stringify(myData));
+  renderPhraseList();
+  if (!myData[currentCat].length) document.getElementById('affirmation-display').innerText = '¡Categoría vacía!';
+}
+
+function updateSpeedLabel() {
+  const v = parseFloat(document.getElementById('speed-slider').value);
+  if (ttsEnabled) {
+    const rate = getTTSRate();
+    document.getElementById('speed-label').innerText = rate + 'x';
+    document.getElementById('speed-label-prefix').innerText = '🔊 Voz:';
+  } else {
+    document.getElementById('speed-label').innerText = v + 's';
+    document.getElementById('speed-label-prefix').innerText = 'Velocidad:';
+  }
+  // Si está en auto sin TTS, reinicia el intervalo con nueva velocidad
+  if (autoMode && !ttsEnabled) {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(nextAffirmation, v * 1000);
+  }
+}
+
+function scheduleNextAuto() {
+  if (!autoMode) return;
+  if (ttsEnabled) {
+    // Con TTS: la siguiente viene cuando termina de hablar (via callback en speakText)
+    // No hace falta hacer nada acá — nextAffirmation llama a speakText con callback
+  } else {
+    // Sin TTS: usa el intervalo normal
+    const v = parseFloat(document.getElementById('speed-slider').value);
+    autoTimer = setTimeout(() => { if (autoMode) { nextAffirmation(); } }, v * 1000);
+  }
+}
+
+function toggleAuto() {
+  const btn = document.getElementById('btn-auto');
+  autoMode = !autoMode;
+  if (autoMode) {
+    btn.innerText = '⏹ Detener Robot'; btn.classList.add('active-auto');
+    nextAffirmation(); // arranca de una
+  } else {
+    clearInterval(autoTimer); clearTimeout(autoTimer);
+    stopTTS();
+    btn.innerText = '🤖 Modo Robótico'; btn.classList.remove('active-auto');
+  }
+}
+
+function resetTotal() {
+  if (!confirm('¿Reiniciar el conteo de "' + currentCat + '"?')) return;
+  sessionCount = 0; saveTotal(currentCat, 0); updateUI();
+  document.getElementById('affirmation-display').innerText = 'Progreso reiniciado ✨';
+}
+
+document.addEventListener('keydown', e => {
+  if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
+  if (document.getElementById('manager-modal').style.display === 'flex') return;
+  if (document.getElementById('lock-screen').style.display !== 'none') return;
+  if (e.key === 'Enter' || e.key === 'ArrowUp') { e.preventDefault(); nextAffirmation(); }
+});
+
+// ─────────────────────────── TIMER ───────────────────────────
+let atTotal = 300; let atRemaining = 300; let atRunning = false; let atInterval;
+
+function fmtTime(s) { return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
+
+function setAffirmPreset(mins, btn) {
+  if (atRunning) return;
+  document.querySelectorAll('.atpreset').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  atTotal = mins * 60; atRemaining = atTotal;
+  document.getElementById('at-display').innerText = fmtTime(atRemaining);
+}
+
+function toggleAffirmTimer() {
+  const btn = document.getElementById('at-start-btn');
+  if (!atRunning) {
+    atRunning = true; btn.innerText = '⏸ Pausar';
+    atInterval = setInterval(() => {
+      atRemaining--;
+      document.getElementById('at-display').innerText = fmtTime(atRemaining);
+      const key = 'matepi_atime_' + currentCat + '_' + today;
+      const prev = parseInt(localStorage.getItem(key)) || 0;
+      localStorage.setItem(key, prev + 1);
+      updateTimerSessionCard();
+      if (atRemaining <= 0) {
+        clearInterval(atInterval); atRunning = false;
+        btn.innerText = '▶ Iniciar';
+        document.getElementById('at-display').innerText = '✓ Listo';
+        showToast('¡Timer completado! 🌸');
+      }
+    }, 1000);
+  } else {
+    atRunning = false; clearInterval(atInterval); btn.innerText = '▶ Continuar';
+  }
+}
+
+function resetAffirmTimer() {
+  clearInterval(atInterval); atRunning = false; atRemaining = atTotal;
+  document.getElementById('at-start-btn').innerText = '▶ Iniciar';
+  document.getElementById('at-display').innerText = fmtTime(atRemaining);
+}
+
+function updateTimerSessionCard() {
+  const key = 'matepi_atime_' + currentCat + '_' + today;
+  const secs = parseInt(localStorage.getItem(key)) || 0;
+  const card = document.getElementById('at-session-card');
+  if (secs > 0) {
+    card.style.display = 'flex';
+    const mins = Math.floor(secs / 60); const secsLeft = secs % 60;
+    document.getElementById('at-session-text').innerText = (mins > 0 ? mins + ' min ' : '') + secsLeft + ' seg afirmando hoy';
+    document.getElementById('at-session-cat').innerText = currentCat;
+  } else { card.style.display = 'none'; }
+}
+
+// ─────────────────────────── RECORDATORIOS ───────────────────────────
+const DAY_LABELS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+let reminderCheckInterval;
+let lastFiredReminder = {};
+
+// Inicializar toggles de días en el formulario
+document.querySelectorAll('.day-pick').forEach(dp => {
+  dp.addEventListener('click', () => dp.classList.toggle('on'));
+});
+
+function getReminders() { return JSON.parse(localStorage.getItem('celeste_reminders')) || []; }
+function saveReminders(r) { localStorage.setItem('celeste_reminders', JSON.stringify(r)); }
+
+function addReminder() {
+  const time = document.getElementById('rem-time').value;
+  const msg = document.getElementById('rem-msg').value.trim() || '¡Momento de afirmar! 🌸';
+  if (!time) { showToast('Elegí un horario primero'); return; }
+  const days = [];
+  document.querySelectorAll('.day-pick.on').forEach(d => days.push(parseInt(d.dataset.day)));
+  if (!days.length) { showToast('Elegí al menos un día'); return; }
+  const reminders = getReminders();
+  reminders.push({ id: 'r' + Date.now(), time, msg, days, paused: false });
+  saveReminders(reminders);
+  document.getElementById('rem-time').value = '';
+  document.getElementById('rem-msg').value = '';
+  renderReminders();
+  showToast('Recordatorio agregado 🔔');
+  requestNotifPermission();
+  syncRemindersToSW();
+}
+
+function toggleReminderPause(id) {
+  const reminders = getReminders();
+  const r = reminders.find(r => r.id === id);
+  if (r) r.paused = !r.paused;
+  saveReminders(reminders); renderReminders(); syncRemindersToSW();
+}
+
+function deleteReminder(id) {
+  const reminders = getReminders().filter(r => r.id !== id);
+  saveReminders(reminders); renderReminders(); syncRemindersToSW();
+}
+
+function updateReminderMsg(id, newMsg) {
+  const reminders = getReminders();
+  const r = reminders.find(r => r.id === id);
+  if (r) r.msg = newMsg;
+  saveReminders(reminders);
+}
+
+function toggleReminderDay(id, day) {
+  const reminders = getReminders();
+  const r = reminders.find(r => r.id === id);
+  if (!r) return;
+  const idx = r.days.indexOf(day);
+  if (idx > -1) r.days.splice(idx, 1); else r.days.push(day);
+  saveReminders(reminders); renderReminders();
+}
+
+function renderReminders() {
+  const reminders = getReminders();
+  const list = document.getElementById('reminders-list');
+  if (!reminders.length) {
+    list.innerHTML = '<div class="reminder-empty">No tenés recordatorios todavía.<br>¡Creá uno para mantener tu práctica! 🌸</div>';
+    return;
+  }
+  list.innerHTML = '';
+  reminders.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'reminder-item' + (r.paused ? ' paused' : '');
+    const daysHtml = DAY_LABELS.map((d, i) =>
+      `<div class="rem-day ${r.days.includes(i)?'on':''}" onclick="toggleReminderDay('${r.id}',${i})">${d}</div>`
+    ).join('');
+    div.innerHTML = `
+      <div style="flex-shrink:0;font-size:22px">${r.paused ? '🔕' : '🔔'}</div>
+      <div class="reminder-body">
+        <div class="reminder-time">${r.time}</div>
+        <input class="reminder-msg-input" value="${r.msg}" onchange="updateReminderMsg('${r.id}',this.value)" placeholder="Mensaje...">
+        <div class="reminder-days">${daysHtml}</div>
+      </div>
+      <div class="reminder-actions">
+        <button class="rem-btn rem-btn-pause" onclick="toggleReminderPause('${r.id}')">${r.paused ? '▶ Activar' : '⏸ Pausar'}</button>
+        <button class="rem-btn rem-btn-del" onclick="deleteReminder('${r.id}')">✕ Quitar</button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+// ─────────────────────────── HISTORIAL ───────────────────────────
+function getHistory() { return JSON.parse(localStorage.getItem('matepi_history')) || []; }
+function saveHistory(h) { localStorage.setItem('matepi_history', JSON.stringify(h)); }
+
+function saveHistoryEntry(cat, phrase) {
+  const h = getHistory();
+  h.unshift({ cat, phrase, ts: Date.now() });
+  if (h.length > 500) h.pop();
+  saveHistory(h);
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  const h = getHistory();
+  if (!h.length) { list.innerHTML = '<div class="history-empty">Todavía no hay afirmaciones. ¡Empezá a usar la app! 🌸</div>'; return; }
+  const groups = {};
+  h.forEach(entry => { const d = dateKey(new Date(entry.ts)); if (!groups[d]) groups[d] = []; groups[d].push(entry); });
+  const catEmoji = { 'Amor': '💖', 'Dinero': '💰', 'Salud': '🌿', 'SP': '✨' };
+  list.innerHTML = '';
+  Object.keys(groups).forEach(day => {
+    const dayGroup = document.createElement('div'); dayGroup.className = 'history-day-group';
+    const label = document.createElement('div'); label.className = 'history-day-label';
+    const dayDate = new Date(day + 'T00:00:00');
+    const isToday = day === today;
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    label.innerText = isToday ? '📅 Hoy' : (dateKey(yesterday) === day ? '📅 Ayer' : '📅 ' + dayDate.toLocaleDateString('es-AR', {weekday:'long', day:'numeric', month:'long'}));
+    dayGroup.appendChild(label);
+    const counts = {};
+    groups[day].forEach(e => { const k = e.cat + '||' + e.phrase; if (!counts[k]) counts[k] = { ...e, count: 0 }; counts[k].count++; });
+    Object.values(counts).forEach(entry => {
+      const timeKey = 'matepi_atime_' + entry.cat + '_' + day;
+      const secs = parseInt(localStorage.getItem(timeKey)) || 0;
+      const item = document.createElement('div'); item.className = 'history-item';
+      const emoji = catEmoji[entry.cat] || '✨';
+      const timeTxt = secs > 0 ? (Math.floor(secs/60) > 0 ? ' · ⏱ ' + Math.floor(secs/60) + 'min ' + (secs%60) + 's' : ' · ⏱ ' + secs + 's') : '';
+      item.innerHTML = `<div class="history-emoji">${emoji}</div><div class="history-body"><div class="history-cat">${entry.cat}</div><div class="history-phrase">${entry.phrase}</div><div class="history-meta">×${entry.count} repeticion${entry.count===1?'':'es'}${timeTxt}</div></div>`;
+      dayGroup.appendChild(item);
+    });
+    list.appendChild(dayGroup);
+  });
+}
+
+// ─────────────────────────── HÁBITOS ───────────────────────────
+const DAY_NAMES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+let weekOffset = 0;
+
+function getWeekDates(off) {
+  const now = new Date(); const dow = now.getDay();
+  const sun = new Date(now); sun.setDate(now.getDate() - dow + off*7); sun.setHours(0,0,0,0);
+  return Array.from({length:7}, (_,i) => { const d = new Date(sun); d.setDate(sun.getDate()+i); return d; });
+}
+
+function getHabits() { return JSON.parse(localStorage.getItem('matepi_habits')) || []; }
+function saveHabits(h) { localStorage.setItem('matepi_habits', JSON.stringify(h)); }
+function getChecks() { return JSON.parse(localStorage.getItem('matepi_habit_checks')) || {}; }
+function saveChecks(c) { localStorage.setItem('matepi_habit_checks', JSON.stringify(c)); }
+
+function changeWeek(dir) { weekOffset = Math.min(weekOffset + dir, 0); renderHabits(); }
+
+function addHabit() {
+  const inp = document.getElementById('new-habit');
+  const name = inp.value.trim(); if (!name) return;
+  const habits = getHabits(); habits.push({ id: 'h' + Date.now(), name });
+  saveHabits(habits); inp.value = ''; renderHabits();
+}
+
+function deleteHabit(id) {
+  if (!confirm('¿Quitar este hábito?')) return;
+  saveHabits(getHabits().filter(h => h.id !== id)); renderHabits();
+}
+
+function toggleCheck(habitId, ds) {
+  const checks = getChecks(); const k = habitId + '_' + ds;
+  if (checks[k]) delete checks[k]; else checks[k] = true;
+  saveChecks(checks); renderHabits();
+}
+
+function renderHabits() {
+  const habits = getHabits(); const checks = getChecks();
+  const weekDates = getWeekDates(weekOffset); const todayStr = today;
+  const fmt = d => d.getDate() + '/' + (d.getMonth()+1);
+  const wl = document.getElementById('week-label');
+  wl.innerText = weekOffset===0 ? 'Esta semana (' + fmt(weekDates[0]) + '–' + fmt(weekDates[6]) + ')' :
+                 weekOffset===-1 ? 'Semana pasada (' + fmt(weekDates[0]) + '–' + fmt(weekDates[6]) + ')' :
+                 fmt(weekDates[0]) + ' – ' + fmt(weekDates[6]);
+  const list = document.getElementById('habits-list'); list.innerHTML = '';
+  if (!habits.length) { list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-soft);font-size:14px">¡Agregá tu primer hábito! 🌱</div>'; }
+  habits.forEach(habit => {
+    const row = document.createElement('div'); row.className = 'habit-row';
+    let checked = 0;
+    const dots = weekDates.map(d => {
+      const ds = dateKey(d); const k = habit.id + '_' + ds; const done = !!checks[k];
+      const isToday = ds === todayStr && weekOffset === 0;
+      if (done) checked++;
+      return `<div class="day-dot ${done?'done':''} ${isToday?'is-today':''}" onclick="toggleCheck('${habit.id}','${ds}')">${DAY_NAMES[d.getDay()]}</div>`;
+    }).join('');
+    const pct = Math.round((checked/7)*100);
+    row.innerHTML = `<div class="habit-top"><span class="habit-name">${habit.name}</span><button class="habit-del" onclick="deleteHabit('${habit.id}')">✕</button></div><div class="habit-days">${dots}</div><div class="habit-prog"><div class="habit-prog-fill" style="width:${pct}%"></div></div>`;
+    list.appendChild(row);
+  });
+  let todayDone = 0;
+  habits.forEach(h => { if (checks[h.id+'_'+todayStr]) todayDone++; });
+  document.getElementById('sum-today').innerText = todayDone + (habits.length ? '/'+habits.length : '');
+  let streak = 0;
+  if (habits.length) { const d = new Date(); for (let i=0;i<365;i++) { const ds=dateKey(d); if (habits.every(h=>checks[h.id+'_'+ds])) streak++; else break; d.setDate(d.getDate()-1); } }
+  document.getElementById('sum-streak').innerText = streak;
+  let possible = habits.length * 7, done = 0;
+  weekDates.forEach(d => habits.forEach(h => { if (checks[h.id+'_'+dateKey(d)]) done++; }));
+  document.getElementById('sum-week').innerText = possible>0 ? Math.round(done/possible*100)+'%' : '0%';
+}
+
+// ─────────────────────────── TAREAS ───────────────────────────
+let taskFilter = 'all';
+function getTasks() { return JSON.parse(localStorage.getItem('matepi_tasks')) || []; }
+function saveTasks(t) { localStorage.setItem('matepi_tasks', JSON.stringify(t)); }
+
+function addTask() {
+  const inp = document.getElementById('new-task'); const text = inp.value.trim(); if (!text) return;
+  const priority = document.getElementById('task-priority').value;
+  const tasks = getTasks(); tasks.unshift({ id: 't'+Date.now(), text, priority, done: false, createdAt: Date.now() });
+  saveTasks(tasks); inp.value = ''; renderTasks();
+}
+
+function toggleTask(id) { const tasks = getTasks(); const t = tasks.find(t=>t.id===id); if(t)t.done=!t.done; saveTasks(tasks); renderTasks(); }
+function deleteTask(id) { saveTasks(getTasks().filter(t=>t.id!==id)); renderTasks(); }
+
+function setTaskFilter(f, btn) {
+  taskFilter = f; document.querySelectorAll('.task-filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderTasks();
+}
+
+const priorityColors = { high:'#ff6b81', med:'#ffd166', low:'#b5ead7' };
+
+function renderTasks() {
+  const tasks = getTasks();
+  const filtered = tasks.filter(t => taskFilter==='all' || (taskFilter==='done'?t.done:!t.done));
+  const pending = tasks.filter(t=>!t.done).length;
+  document.getElementById('task-counter').innerText = pending + ' pendiente' + (pending===1?'':'s') + ' de ' + tasks.length + ' total';
+  const list = document.getElementById('tasks-list');
+  if (!filtered.length) { list.innerHTML = '<div class="task-empty">'+(tasks.length===0?'¡Agregá tu primera tarea! ✨':taskFilter==='done'?'Todavía no completaste ninguna. ¡Vamos!':'¡Todo completado! 🎉')+'</div>'; return; }
+  const prioOrder = {high:0,med:1,low:2};
+  const sorted = [...filtered].sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;return prioOrder[a.priority]-prioOrder[b.priority];});
+  list.innerHTML = '';
+  sorted.forEach(task => {
+    const div = document.createElement('div'); div.className = 'task-item'+(task.done?' done':'');
+    div.innerHTML = `<div class="task-checkbox ${task.done?'checked':''}" onclick="toggleTask('${task.id}')"></div><div class="task-priority" style="background:${priorityColors[task.priority]}"></div><div class="task-text">${task.text}</div><button class="task-del" onclick="deleteTask('${task.id}')">✕</button>`;
+    list.appendChild(div);
+  });
+}
+
+// ─────────────────────────── SERVICE WORKER ───────────────────────────
+let swRegistration = null;
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    swRegistration = await navigator.serviceWorker.register('./sw.js');
+    console.log('✅ Service Worker registrado');
+    // Escuchar mensajes del SW
+    navigator.serviceWorker.addEventListener('message', event => {
+      if (event.data?.type === 'SW_READY') syncRemindersToSW();
+    });
+    // Intentar Periodic Background Sync (Chrome Android principalmente)
+    if ('periodicSync' in swRegistration) {
+      try {
+        await swRegistration.periodicSync.register('check-reminders', { minInterval: 60 * 1000 });
+        console.log('✅ Periodic Sync registrado');
+      } catch (e) { console.log('Periodic Sync no disponible:', e); }
+    }
+  } catch (e) { console.warn('SW no pudo registrarse:', e); }
+}
+
+// Envía los recordatorios actuales al Service Worker
+function syncRemindersToSW() {
+  if (!navigator.serviceWorker.controller) return;
+  const reminders = getReminders();
+  navigator.serviceWorker.controller.postMessage({
+    type: 'SCHEDULE_REMINDERS',
+    reminders: reminders
+  });
+}
+
+// Notificación nativa con fallback a toast cuando la pestaña está abierta
+async function fireNotification(msg) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    // Si hay SW activo, usarlo para la notificación (funciona en segundo plano)
+    if (swRegistration) {
+      await swRegistration.showNotification('Celeste ✨', {
+        body: msg,
+        icon: './icon-192.png',
+        vibrate: [200, 100, 200],
+        tag: 'celeste-reminder',
+        renotify: true
+      });
+    } else {
+      new Notification('Celeste ✨', { body: msg });
+    }
+  }
+  showToast(msg);
+  if (ttsEnabled) speakText(msg);
+}
+
+// Verificador de recordatorios (respaldo cuando la pestaña está abierta)
+function checkReminders() {
+  // No disparar si la app está bloqueada
+  if (document.getElementById('lock-screen').style.display !== 'none') return;
+  const now = new Date();
+  const hhmm = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const dow = now.getDay();
+  const reminders = getReminders();
+  reminders.forEach(r => {
+    if (r.paused) return;
+    if (!r.days.includes(dow)) return;
+    if (r.time !== hhmm) return;
+    const key = r.id + '_' + hhmm + '_' + dateKey(now);
+    if (lastFiredReminder[key]) return;
+    lastFiredReminder[key] = true;
+    fireNotification(r.msg);
+  });
+}
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') showToast('🔔 Notificaciones activadas');
+  }
+}
+
+// ─────────────────────────── INIT ───────────────────────────
+function initApp() {
+  myData = JSON.parse(localStorage.getItem('matepi_phrases')) || defaultData;
+  currentCat = Object.keys(myData)[0];
+  sessionCount = 0;
+  renderPills();
+  updateUI();
+  updateTimerSessionCard();
+  updateStreak();
+  renderHabits();
+  renderTasks();
+  renderReminders();
+  loadVoices();
+  requestNotifPermission().then(() => registerServiceWorker());
+  // Verificar recordatorios cada 30 segundos (cuando la pestaña está abierta)
+  if (reminderCheckInterval) clearInterval(reminderCheckInterval);
+  reminderCheckInterval = setInterval(checkReminders, 30000);
+  checkReminders();
+}
+</script>
+</body>
+</html>

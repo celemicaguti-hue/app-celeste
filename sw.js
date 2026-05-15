@@ -1,6 +1,6 @@
 // Celeste ✨ — Service Worker
 // ⚠️ Subí este número cada vez que hagas un deploy para forzar la actualización
-const CACHE_NAME = 'celeste-v2';
+const CACHE_NAME = 'celeste-v3';
 const ASSETS = ['./index.html', './manifest.json'];
 
 // ── INSTALACIÓN: cachea los archivos principales ──

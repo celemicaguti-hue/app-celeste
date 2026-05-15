@@ -527,6 +527,88 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
 .priority-low { background: var(--mint); }
 .priority-select { padding: 10px 12px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.9); background: var(--glass-strong); font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); outline: none; width: 100px; flex-shrink: 0; }
 
+
+
+/* ── PLANNER ── */
+#tab-planner { max-width: 980px; }
+#tab-planner .card { padding: 30px 26px; }
+
+#planner-list {
+  margin-top: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.95);
+  overflow: hidden;
+  background: rgba(255,255,255,0.76);
+}
+
+.planner-row {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(80,60,110,0.08);
+  min-height: 56px;
+}
+.planner-row:last-child { border-bottom: none; }
+
+.planner-hour {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: 0.6px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.88);
+  border: 1px solid rgba(255,255,255,0.95);
+  text-align: center;
+}
+
+.planner-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.planner-empty {
+  color: rgba(112,107,135,0.68);
+  font-weight: 700;
+}
+
+.planner-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.85);
+}
+
+.planner-row.filled { backdrop-filter: blur(8px); }
+.planner-row.filled .planner-content { color: #3a3150; }
+
+.planner-row.type-task { background: linear-gradient(90deg, rgba(255,174,202,0.3), rgba(255,255,255,0.85)); }
+.planner-row.type-task .planner-dot { background: #ff7fa8; }
+
+.planner-row.type-work { background: linear-gradient(90deg, rgba(178,219,255,0.38), rgba(255,255,255,0.85)); }
+.planner-row.type-work .planner-dot { background: #6bb8ff; }
+
+.planner-row.type-study { background: linear-gradient(90deg, rgba(205,188,255,0.33), rgba(255,255,255,0.85)); }
+.planner-row.type-study .planner-dot { background: #9b7fff; }
+
+.planner-row.type-free { background: linear-gradient(90deg, rgba(186,236,214,0.32), rgba(255,255,255,0.85)); }
+.planner-row.type-free .planner-dot { background: #5fcf9d; }
+
+.planner-row.empty {
+  background: rgba(255,255,255,0.5);
+}
+.planner-row.empty .planner-hour {
+  background: rgba(255,255,255,0.68);
+  color: rgba(80,70,102,0.8);
+}
+
 /* ── MODAL ── */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(60,40,80,0.4); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
 .modal-box { background: var(--glass); border: 1px solid rgba(255,255,255,0.9); padding: 26px; border-radius: 26px; width: 100%; max-width: 400px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(100,60,120,0.2); }
@@ -557,6 +639,9 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
   .input-row { flex-direction: column; }
   .btn-add { padding: 12px; }
   .priority-select { width: 100%; }
+  #tab-planner { max-width: 100%; }
+  .planner-row { grid-template-columns: 74px 1fr auto; padding: 10px 12px; gap: 8px; }
+  .planner-hour { font-size: 12px; padding: 6px 8px; }
   .timer-clock { width: 104px; height: 104px; }
   .timer-clock .affirm-timer-display { font-size: 22px; }
 }
@@ -1823,8 +1908,10 @@ function renderPlanner() {
     const hh = String(h).padStart(2,'0') + ':00';
     const block = day[hh];
     const div = document.createElement('div');
-    div.className = 'task-item' + (block ? '' : ' done');
-    div.innerHTML = `<div class="task-priority" style="background:${block ? '#bde0fe' : '#eee'}"></div><div class="task-text"><strong>${hh}</strong> · ${block ? (icon[block.type] + ' ' + block.note) : 'Libre'}</div>${block ? `<button class="task-del" onclick="deletePlannerBlock('${hh}')">✕</button>` : ''}`;
+    const type = block ? block.type : 'free';
+    const rowClass = block ? `planner-row filled type-${type}` : 'planner-row empty';
+    div.className = rowClass;
+    div.innerHTML = `<div class="planner-hour">${hh}</div><div class="planner-content ${block ? '' : 'planner-empty'}"><span class="planner-dot"></span>${block ? (icon[type] + ' ' + block.note) : 'Libre'}</div>${block ? `<button class="task-del" onclick="deletePlannerBlock('${hh}')">✕</button>` : ''}`;
     list.appendChild(div);
   }
 }

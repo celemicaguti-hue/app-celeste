@@ -596,6 +596,7 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
   <button class="tab-btn" onclick="switchTab('habitos', this)">🌿 Hábitos</button>
   <button class="tab-btn" onclick="switchTab('tareas', this)">✅ Tareas</button>
   <button class="tab-btn" onclick="switchTab('recordatorios', this)">🔔 Recordatorios</button>
+  <button class="tab-btn" onclick="switchTab('planner', this)">🗓 Planner</button>
 </div>
 
 <!-- ══════════════════ AFIRMACIONES ══════════════════ -->
@@ -818,6 +819,38 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
   </div>
 </div>
 
+
+<!-- ══════════════════ PLANNER ══════════════════ -->
+<div class="tab-panel" id="tab-planner">
+  <div class="card">
+    <div class="section-title">🗓 Planner Aesthetic</div>
+    <div class="input-row">
+      <input type="date" id="planner-date" onchange="renderPlanner()">
+      <button class="btn-add" onclick="goTodayPlanner()">Hoy</button>
+    </div>
+    <div class="input-row">
+      <input type="text" id="planner-note" placeholder="Tarea / trabajo / estudio..." onkeypress="if(event.key==='Enter')savePlannerBlock()">
+      <select id="planner-type" class="priority-select">
+        <option value="work">💼 Trabajo</option>
+        <option value="study">📘 Estudio</option>
+        <option value="task" selected>✅ Tarea</option>
+        <option value="free">🌸 Libre</option>
+      </select>
+    </div>
+    <div class="input-row">
+      <select id="planner-hour" class="priority-select"></select>
+      <button class="btn-add pink" onclick="savePlannerBlock()">Guardar bloque</button>
+    </div>
+    <div id="planner-list"></div>
+    <div class="sec-btns" style="margin-top:12px">
+      <button class="btn-sec" onclick="exportCelesteData()">⬇ Exportar datos</button>
+      <button class="btn-sec" onclick="importCelesteData()">⬆ Importar datos</button>
+      <button class="btn-sec" onclick="clearAppCache()">🧹 Limpiar caché app</button>
+    </div>
+    <input type="file" id="import-file" accept="application/json" style="display:none" onchange="handleImportFile(event)">
+  </div>
+</div>
+
 </div><!-- end main-app -->
 
 <!-- MODAL FRASES -->
@@ -878,6 +911,7 @@ function switchTab(name, btn) {
   if (name === 'historial') renderHistory();
   if (name === 'tareas') renderTasks();
   if (name === 'recordatorios') renderReminders();
+  if (name === 'planner') renderPlanner();
 }
 
 // ─────────────────────────── UTILS ───────────────────────────
@@ -1480,6 +1514,7 @@ function addReminder() {
   document.getElementById('rem-time').value = '';
   document.getElementById('rem-msg').value = '';
   renderReminders();
+  renderPlanner();
   showToast('Recordatorio agregado 🔔');
   requestNotifPermission();
   syncRemindersToSW();
@@ -1731,6 +1766,111 @@ function renderTasks() {
   });
 }
 
+// ─────────────────────────── PLANNER + SYNC ───────────────────────────
+const PLANNER_KEY = 'celeste_planner_blocks';
+
+function plannerDateKey() {
+  const v = document.getElementById('planner-date')?.value;
+  return v || todayKey();
+}
+function getPlannerBlocks() { return JSON.parse(localStorage.getItem(PLANNER_KEY)) || {}; }
+function savePlannerBlocks(data) { localStorage.setItem(PLANNER_KEY, JSON.stringify(data)); }
+
+function goTodayPlanner() {
+  document.getElementById('planner-date').value = todayKey();
+  renderPlanner();
+}
+
+function savePlannerBlock() {
+  const note = document.getElementById('planner-note').value.trim();
+  const hour = document.getElementById('planner-hour').value;
+  const type = document.getElementById('planner-type').value;
+  if (!note) return showToast('Escribí una actividad para el bloque');
+  const key = plannerDateKey();
+  const all = getPlannerBlocks();
+  if (!all[key]) all[key] = {};
+  all[key][hour] = { note, type };
+  savePlannerBlocks(all);
+  document.getElementById('planner-note').value = '';
+  renderPlanner();
+  showToast('Bloque guardado ✨');
+}
+
+function deletePlannerBlock(hour) {
+  const all = getPlannerBlocks(); const key = plannerDateKey();
+  if (all[key]) delete all[key][hour];
+  savePlannerBlocks(all); renderPlanner();
+}
+
+function renderPlanner() {
+  const dateInp = document.getElementById('planner-date');
+  if (dateInp && !dateInp.value) dateInp.value = todayKey();
+  const hourSel = document.getElementById('planner-hour');
+  if (hourSel && !hourSel.options.length) {
+    for (let h=0; h<24; h++) {
+      const hh = String(h).padStart(2,'0') + ':00';
+      const op = document.createElement('option'); op.value = hh; op.textContent = hh;
+      hourSel.appendChild(op);
+    }
+  }
+  const all = getPlannerBlocks();
+  const day = all[plannerDateKey()] || {};
+  const list = document.getElementById('planner-list');
+  if (!list) return;
+  const icon = {work:'💼', study:'📘', task:'✅', free:'🌸'};
+  list.innerHTML = '';
+  for (let h=0; h<24; h++) {
+    const hh = String(h).padStart(2,'0') + ':00';
+    const block = day[hh];
+    const div = document.createElement('div');
+    div.className = 'task-item' + (block ? '' : ' done');
+    div.innerHTML = `<div class="task-priority" style="background:${block ? '#bde0fe' : '#eee'}"></div><div class="task-text"><strong>${hh}</strong> · ${block ? (icon[block.type] + ' ' + block.note) : 'Libre'}</div>${block ? `<button class="task-del" onclick="deletePlannerBlock('${hh}')">✕</button>` : ''}`;
+    list.appendChild(div);
+  }
+}
+
+function exportCelesteData() {
+  const data = {};
+  for (let i=0;i<localStorage.length;i++) {
+    const k = localStorage.key(i);
+    data[k] = localStorage.getItem(k);
+  }
+  const payload = { exportedAt: new Date().toISOString(), data };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `celeste-backup-${todayKey()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importCelesteData() { document.getElementById('import-file').click(); }
+function handleImportFile(event) {
+  const f = event.target.files?.[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const payload = JSON.parse(reader.result);
+      const data = payload.data || payload;
+      Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+      showToast('Datos importados 💾');
+      initApp();
+    } catch { showToast('Archivo inválido'); }
+  };
+  reader.readAsText(f);
+}
+
+async function clearAppCache() {
+  if ('caches' in window) {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+  }
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r => r.update()));
+  }
+  showToast('Caché limpiada. Tus datos siguen guardados ✨');
+}
+
 // ─────────────────────────── SERVICE WORKER ───────────────────────────
 let swRegistration = null;
 
@@ -1822,6 +1962,7 @@ function initApp() {
   renderHabits();
   renderTasks();
   renderReminders();
+  renderPlanner();
   loadVoices();
   loadTTSRate();
   loadTTSVolume();

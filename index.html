@@ -527,6 +527,59 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
 .priority-low { background: var(--mint); }
 .priority-select { padding: 10px 12px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.9); background: var(--glass-strong); font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); outline: none; width: 100px; flex-shrink: 0; }
 
+/* ── PLANNER ── */
+#tab-planner { max-width: 860px; }
+#tab-planner .card { padding: 24px 20px; }
+.planner-grid {
+  background: rgba(255,255,255,0.58);
+  border: 1px solid rgba(255,255,255,0.9);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.planner-row {
+  display: grid;
+  grid-template-columns: 74px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.8);
+}
+.planner-row:last-child { border-bottom: none; }
+.planner-hour {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--text-soft);
+  text-align: center;
+}
+.planner-block {
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+.planner-block.free {
+  background: rgba(255,255,255,0.72);
+  color: var(--text-soft);
+  border-color: rgba(255,255,255,0.9);
+}
+.planner-block.task { background: rgba(255,133,161,0.20); color: #973b6f; border-color: rgba(255,133,161,0.35); }
+.planner-block.work { background: rgba(144,201,249,0.23); color: #2a5f8e; border-color: rgba(144,201,249,0.45); }
+.planner-block.study { background: rgba(232,213,245,0.35); color: #6b4a96; border-color: rgba(179,111,255,0.38); }
+.planner-block.freecat { background: rgba(181,234,215,0.35); color: #356a5a; border-color: rgba(104,192,157,0.35); }
+.planner-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.planner-chip {
+  border-radius: 14px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
 /* ── MODAL ── */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(60,40,80,0.4); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
 .modal-box { background: var(--glass); border: 1px solid rgba(255,255,255,0.9); padding: 26px; border-radius: 26px; width: 100%; max-width: 400px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(100,60,120,0.2); }
@@ -557,6 +610,8 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
   .input-row { flex-direction: column; }
   .btn-add { padding: 12px; }
   .priority-select { width: 100%; }
+  .planner-row { grid-template-columns: 60px 1fr auto; padding: 8px; gap: 8px; }
+  .planner-block { font-size: 12px; padding: 9px; }
   .timer-clock { width: 104px; height: 104px; }
   .timer-clock .affirm-timer-display { font-size: 22px; }
 }
@@ -596,6 +651,7 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
   <button class="tab-btn" onclick="switchTab('habitos', this)">🌿 Hábitos</button>
   <button class="tab-btn" onclick="switchTab('tareas', this)">✅ Tareas</button>
   <button class="tab-btn" onclick="switchTab('recordatorios', this)">🔔 Recordatorios</button>
+  <button class="tab-btn" onclick="switchTab('planner', this)">🗓 Planner</button>
 </div>
 
 <!-- ══════════════════ AFIRMACIONES ══════════════════ -->
@@ -818,6 +874,44 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
   </div>
 </div>
 
+
+<!-- ══════════════════ PLANNER ══════════════════ -->
+<div class="tab-panel" id="tab-planner">
+  <div class="card">
+    <div class="section-title">🗓 Planner Aesthetic</div>
+    <div class="planner-legend">
+      <span class="planner-chip planner-block task">✅ Tarea</span>
+      <span class="planner-chip planner-block work">💼 Trabajo</span>
+      <span class="planner-chip planner-block study">📘 Estudio</span>
+      <span class="planner-chip planner-block freecat">🌸 Libre planificado</span>
+    </div>
+    <div class="input-row">
+      <input type="date" id="planner-date" onchange="renderPlanner()">
+      <button class="btn-add" onclick="goTodayPlanner()">Hoy</button>
+    </div>
+    <div class="input-row">
+      <input type="text" id="planner-note" placeholder="Tarea / trabajo / estudio..." onkeypress="if(event.key==='Enter')savePlannerBlock()">
+      <select id="planner-type" class="priority-select">
+        <option value="work">💼 Trabajo</option>
+        <option value="study">📘 Estudio</option>
+        <option value="task" selected>✅ Tarea</option>
+        <option value="free">🌸 Libre</option>
+      </select>
+    </div>
+    <div class="input-row">
+      <select id="planner-hour" class="priority-select"></select>
+      <button class="btn-add pink" onclick="savePlannerBlock()">Guardar bloque</button>
+    </div>
+    <div id="planner-list" class="planner-grid"></div>
+    <div class="sec-btns" style="margin-top:12px">
+      <button class="btn-sec" onclick="exportCelesteData()">⬇ Exportar datos</button>
+      <button class="btn-sec" onclick="importCelesteData()">⬆ Importar datos</button>
+      <button class="btn-sec" onclick="clearAppCache()">🧹 Limpiar caché app</button>
+    </div>
+    <input type="file" id="import-file" accept="application/json" style="display:none" onchange="handleImportFile(event)">
+  </div>
+</div>
+
 </div><!-- end main-app -->
 
 <!-- MODAL FRASES -->
@@ -878,6 +972,7 @@ function switchTab(name, btn) {
   if (name === 'historial') renderHistory();
   if (name === 'tareas') renderTasks();
   if (name === 'recordatorios') renderReminders();
+  if (name === 'planner') renderPlanner();
 }
 
 // ─────────────────────────── UTILS ───────────────────────────
@@ -1480,6 +1575,7 @@ function addReminder() {
   document.getElementById('rem-time').value = '';
   document.getElementById('rem-msg').value = '';
   renderReminders();
+  renderPlanner();
   showToast('Recordatorio agregado 🔔');
   requestNotifPermission();
   syncRemindersToSW();
@@ -1731,6 +1827,112 @@ function renderTasks() {
   });
 }
 
+// ─────────────────────────── PLANNER + SYNC ───────────────────────────
+const PLANNER_KEY = 'celeste_planner_blocks';
+
+function plannerDateKey() {
+  const v = document.getElementById('planner-date')?.value;
+  return v || todayKey();
+}
+function getPlannerBlocks() { return JSON.parse(localStorage.getItem(PLANNER_KEY)) || {}; }
+function savePlannerBlocks(data) { localStorage.setItem(PLANNER_KEY, JSON.stringify(data)); }
+
+function goTodayPlanner() {
+  document.getElementById('planner-date').value = todayKey();
+  renderPlanner();
+}
+
+function savePlannerBlock() {
+  const note = document.getElementById('planner-note').value.trim();
+  const hour = document.getElementById('planner-hour').value;
+  const type = document.getElementById('planner-type').value;
+  if (!note) return showToast('Escribí una actividad para el bloque');
+  const key = plannerDateKey();
+  const all = getPlannerBlocks();
+  if (!all[key]) all[key] = {};
+  all[key][hour] = { note, type };
+  savePlannerBlocks(all);
+  document.getElementById('planner-note').value = '';
+  renderPlanner();
+  showToast('Bloque guardado ✨');
+}
+
+function deletePlannerBlock(hour) {
+  const all = getPlannerBlocks(); const key = plannerDateKey();
+  if (all[key]) delete all[key][hour];
+  savePlannerBlocks(all); renderPlanner();
+}
+
+function renderPlanner() {
+  const dateInp = document.getElementById('planner-date');
+  if (dateInp && !dateInp.value) dateInp.value = todayKey();
+  const hourSel = document.getElementById('planner-hour');
+  if (hourSel && !hourSel.options.length) {
+    for (let h=0; h<24; h++) {
+      const hh = String(h).padStart(2,'0') + ':00';
+      const op = document.createElement('option'); op.value = hh; op.textContent = hh;
+      hourSel.appendChild(op);
+    }
+  }
+  const all = getPlannerBlocks();
+  const day = all[plannerDateKey()] || {};
+  const list = document.getElementById('planner-list');
+  if (!list) return;
+  const icon = {work:'💼', study:'📘', task:'✅', free:'🌸'};
+  const cssType = {work:'work', study:'study', task:'task', free:'freecat'};
+  list.innerHTML = '';
+  for (let h=0; h<24; h++) {
+    const hh = String(h).padStart(2,'0') + ':00';
+    const block = day[hh];
+    const div = document.createElement('div');
+    div.className = 'planner-row';
+    div.innerHTML = `<div class="planner-hour">${hh}</div><div class="planner-block ${block ? (cssType[block.type] || 'task') : 'free'}">${block ? (icon[block.type] + ' ' + block.note) : 'Hueco libre'}</div>${block ? `<button class="task-del" onclick="deletePlannerBlock('${hh}')">✕</button>` : '<span style="width:24px"></span>'}`;
+    list.appendChild(div);
+  }
+}
+
+function exportCelesteData() {
+  const data = {};
+  for (let i=0;i<localStorage.length;i++) {
+    const k = localStorage.key(i);
+    data[k] = localStorage.getItem(k);
+  }
+  const payload = { exportedAt: new Date().toISOString(), data };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `celeste-backup-${todayKey()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importCelesteData() { document.getElementById('import-file').click(); }
+function handleImportFile(event) {
+  const f = event.target.files?.[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const payload = JSON.parse(reader.result);
+      const data = payload.data || payload;
+      Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+      showToast('Datos importados 💾');
+      initApp();
+    } catch { showToast('Archivo inválido'); }
+  };
+  reader.readAsText(f);
+}
+
+async function clearAppCache() {
+  if ('caches' in window) {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+  }
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r => r.update()));
+  }
+  showToast('Caché limpiada. Tus datos siguen guardados ✨');
+}
+
 // ─────────────────────────── SERVICE WORKER ───────────────────────────
 let swRegistration = null;
 
@@ -1822,6 +2024,7 @@ function initApp() {
   renderHabits();
   renderTasks();
   renderReminders();
+  renderPlanner();
   loadVoices();
   loadTTSRate();
   loadTTSVolume();

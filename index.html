@@ -530,83 +530,220 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
 
 
 /* ── PLANNER ── */
-#tab-planner { max-width: 980px; }
+#tab-planner { max-width: 1120px; }
 #tab-planner .card { padding: 30px 26px; }
 
-#planner-list {
-  margin-top: 16px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.95);
-  overflow: hidden;
-  background: rgba(255,255,255,0.76);
+.planner-form {
+  background: linear-gradient(135deg, rgba(255,255,255,0.74), rgba(255,207,223,0.34));
+  border: 1px solid rgba(255,255,255,0.9);
+  border-radius: 24px;
+  padding: 16px;
+  margin-bottom: 18px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
 }
-
-.planner-row {
+.planner-form-grid {
   display: grid;
-  grid-template-columns: 92px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(80,60,110,0.08);
-  min-height: 56px;
+  grid-template-columns: minmax(300px, 1.4fr) repeat(4, minmax(120px, 0.8fr));
+  gap: 10px;
+  align-items: end;
 }
-.planner-row:last-child { border-bottom: none; }
-
-.planner-hour {
-  font-size: 13px;
+.planner-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.planner-field label {
+  font-size: 10px;
   font-weight: 900;
-  color: var(--text);
-  letter-spacing: 0.6px;
-  padding: 7px 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.88);
-  border: 1px solid rgba(255,255,255,0.95);
-  text-align: center;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  padding-left: 4px;
 }
-
-.planner-content {
+.planner-field input,
+.planner-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 15px;
+  border: 1.5px solid rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.86);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  outline: none;
+}
+.planner-field input:focus,
+.planner-field select:focus { border-color: rgba(255,133,161,0.78); }
+.planner-title-field { grid-column: span 1; }
+.planner-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+.planner-colors {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+}
+.planner-color-label {
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-right: 2px;
+}
+.planner-color-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.96);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(95,70,120,0.12);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.planner-color-btn.active {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 3px rgba(255,133,161,0.28), 0 6px 16px rgba(95,70,120,0.14);
+}
+.planner-custom-color {
+  width: 34px;
+  height: 30px;
+  padding: 2px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.82);
+  cursor: pointer;
+}
+.planner-save-btn {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, var(--pink), #c97fff);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(255,133,161,0.34);
+}
+
+.planner-grid-wrap {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  border-radius: 24px;
+}
+.planner-grid {
+  display: grid;
+  grid-template-columns: 78px repeat(7, minmax(118px, 1fr));
+  grid-auto-rows: minmax(58px, auto);
+  min-width: 920px;
+  border: 1px solid rgba(255,255,255,0.92);
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.56);
+  box-shadow: var(--shadow);
+}
+.planner-head,
+.planner-time,
+.planner-cell {
+  border-right: 1px solid rgba(100,80,130,0.08);
+  border-bottom: 1px solid rgba(100,80,130,0.08);
+}
+.planner-head {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(255,207,223,0.95), rgba(232,213,245,0.92));
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+.planner-head.time-head {
+  background: linear-gradient(135deg, rgba(255,255,255,0.88), rgba(189,224,254,0.45));
+}
+.planner-time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: rgba(255,255,255,0.78);
+  color: rgba(61,52,80,0.8);
+  font-size: 12px;
+  font-weight: 900;
+}
+.planner-cell {
+  min-height: 58px;
+  background: rgba(255,255,255,0.48);
+}
+.planner-cell:nth-child(odd) { background: rgba(255,255,255,0.34); }
+.planner-block {
+  z-index: 2;
+  margin: 5px;
+  padding: 9px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.9);
+  box-shadow: 0 8px 18px rgba(95,70,120,0.12);
+  color: #3a3150;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.planner-block-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.planner-block-title {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.planner-block-meta {
+  font-size: 10px;
+  font-weight: 900;
+  color: rgba(61,52,80,0.7);
+  line-height: 1.25;
+}
+.planner-block-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.planner-mini-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.55);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.planner-mini-btn:hover { background: rgba(255,255,255,0.9); color: var(--pink); }
+.planner-empty-note {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.58);
+  color: var(--text-soft);
   font-size: 13px;
   font-weight: 800;
-  color: var(--text);
-}
-
-.planner-empty {
-  color: rgba(112,107,135,0.68);
-  font-weight: 700;
-}
-
-.planner-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.85);
-}
-
-.planner-row.filled { backdrop-filter: blur(8px); }
-.planner-row.filled .planner-content { color: #3a3150; }
-
-.planner-row.type-task { background: linear-gradient(90deg, rgba(255,174,202,0.3), rgba(255,255,255,0.85)); }
-.planner-row.type-task .planner-dot { background: #ff7fa8; }
-
-.planner-row.type-work { background: linear-gradient(90deg, rgba(178,219,255,0.38), rgba(255,255,255,0.85)); }
-.planner-row.type-work .planner-dot { background: #6bb8ff; }
-
-.planner-row.type-study { background: linear-gradient(90deg, rgba(205,188,255,0.33), rgba(255,255,255,0.85)); }
-.planner-row.type-study .planner-dot { background: #9b7fff; }
-
-.planner-row.type-free { background: linear-gradient(90deg, rgba(186,236,214,0.32), rgba(255,255,255,0.85)); }
-.planner-row.type-free .planner-dot { background: #5fcf9d; }
-
-.planner-row.empty {
-  background: rgba(255,255,255,0.5);
-}
-.planner-row.empty .planner-hour {
-  background: rgba(255,255,255,0.68);
-  color: rgba(80,70,102,0.8);
+  text-align: center;
 }
 
 /* ── MODAL ── */
@@ -640,8 +777,16 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
   .btn-add { padding: 12px; }
   .priority-select { width: 100%; }
   #tab-planner { max-width: 100%; }
-  .planner-row { grid-template-columns: 74px 1fr auto; padding: 10px 12px; gap: 8px; }
-  .planner-hour { font-size: 12px; padding: 6px 8px; }
+  #tab-planner .card { padding: 22px 14px; }
+  .planner-form { padding: 14px; border-radius: 20px; }
+  .planner-form-grid { grid-template-columns: 1fr; }
+  .planner-title-field { grid-column: auto; }
+  .planner-actions { grid-template-columns: 1fr; }
+  .planner-save-btn { width: 100%; }
+  .planner-grid { grid-template-columns: 68px repeat(7, minmax(112px, 1fr)); min-width: 860px; }
+  .planner-head { font-size: 11px; padding: 8px 6px; }
+  .planner-time { font-size: 11px; padding: 6px; }
+  .planner-block { padding: 8px; margin: 4px; border-radius: 14px; }
   .timer-clock { width: 104px; height: 104px; }
   .timer-clock .affirm-timer-display { font-size: 22px; }
 }
@@ -908,25 +1053,41 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
 <!-- ══════════════════ PLANNER ══════════════════ -->
 <div class="tab-panel" id="tab-planner">
   <div class="card">
-    <div class="section-title">🗓 Planner Aesthetic</div>
-    <div class="input-row">
-      <input type="date" id="planner-date" onchange="renderPlanner()">
-      <button class="btn-add" onclick="goTodayPlanner()">Hoy</button>
+    <div class="section-title">🗓 Planner semanal</div>
+    <div class="planner-form">
+      <div class="planner-form-grid">
+        <div class="planner-field planner-title-field">
+          <label for="planner-title">Bloque</label>
+          <input type="text" id="planner-title" placeholder="Ej: Geometría 1, Clase particular, Estudiar álgebra…" onkeypress="if(event.key==='Enter')savePlannerBlock()">
+        </div>
+        <div class="planner-field">
+          <label for="planner-day">Día</label>
+          <select id="planner-day"></select>
+        </div>
+        <div class="planner-field">
+          <label for="planner-start">Inicio</label>
+          <select id="planner-start"></select>
+        </div>
+        <div class="planner-field">
+          <label for="planner-end">Fin</label>
+          <select id="planner-end"></select>
+        </div>
+        <div class="planner-field">
+          <label for="planner-category">Categoría</label>
+          <select id="planner-category"></select>
+        </div>
+      </div>
+      <div class="planner-actions">
+        <div class="planner-colors" id="planner-color-presets">
+          <span class="planner-color-label">Color</span>
+        </div>
+        <button class="planner-save-btn" id="planner-save-btn" onclick="savePlannerBlock()">Guardar bloque</button>
+      </div>
     </div>
-    <div class="input-row">
-      <input type="text" id="planner-note" placeholder="Tarea / trabajo / estudio..." onkeypress="if(event.key==='Enter')savePlannerBlock()">
-      <select id="planner-type" class="priority-select">
-        <option value="work">💼 Trabajo</option>
-        <option value="study">📘 Estudio</option>
-        <option value="task" selected>✅ Tarea</option>
-        <option value="free">🌸 Libre</option>
-      </select>
+    <div class="planner-grid-wrap">
+      <div id="planner-grid" class="planner-grid"></div>
     </div>
-    <div class="input-row">
-      <select id="planner-hour" class="priority-select"></select>
-      <button class="btn-add pink" onclick="savePlannerBlock()">Guardar bloque</button>
-    </div>
-    <div id="planner-list"></div>
+    <div id="planner-empty-note" class="planner-empty-note"></div>
     <div class="sec-btns" style="margin-top:12px">
       <button class="btn-sec" onclick="exportCelesteData()">⬇ Exportar datos</button>
       <button class="btn-sec" onclick="importCelesteData()">⬆ Importar datos</button>
@@ -1853,66 +2014,229 @@ function renderTasks() {
 
 // ─────────────────────────── PLANNER + SYNC ───────────────────────────
 const PLANNER_KEY = 'celeste_planner_blocks';
+const PLANNER_DAYS = [
+  { key: 'lunes', label: 'Lunes' },
+  { key: 'martes', label: 'Martes' },
+  { key: 'miercoles', label: 'Miércoles' },
+  { key: 'jueves', label: 'Jueves' },
+  { key: 'viernes', label: 'Viernes' },
+  { key: 'sabado', label: 'Sábado' },
+  { key: 'domingo', label: 'Domingo' }
+];
+const PLANNER_CATEGORIES = {
+  study: { label: 'Estudio', emoji: '📘' },
+  tutoring: { label: 'Clases particulares', emoji: '👩‍🏫' },
+  work: { label: 'Trabajo', emoji: '💼' },
+  task: { label: 'Tareas', emoji: '✅' },
+  free: { label: 'Tiempo libre', emoji: '🌸' },
+  habits: { label: 'Hábitos', emoji: '✨' },
+  personal: { label: 'Personal', emoji: '✨' }
+};
+const PLANNER_COLORS = ['#ffd6e8', '#e8d5f5', '#bde0fe', '#b5ead7', '#fff1b8', '#ffcfd2', '#d9f7f1'];
+const PLANNER_START_HOUR = 7;
+const PLANNER_END_HOUR = 24;
+let plannerEditingId = null;
+let plannerSelectedColor = PLANNER_COLORS[0];
+let plannerControlsReady = false;
 
-function plannerDateKey() {
-  const v = document.getElementById('planner-date')?.value;
-  return v || todayKey();
+function escapeHtml(text) {
+  return String(text || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
-function getPlannerBlocks() { return JSON.parse(localStorage.getItem(PLANNER_KEY)) || {}; }
+
+function timeToHour(time) {
+  if (time === '00:00') return 24;
+  const h = parseInt(String(time).split(':')[0], 10);
+  return Number.isNaN(h) ? PLANNER_START_HOUR : h;
+}
+
+function hourToTime(hour) {
+  return String(hour === 24 ? 0 : hour).padStart(2, '0') + ':00';
+}
+
+function normalizePlannerBlock(block, index = 0) {
+  const category = block.category || block.type || 'task';
+  const start = block.start || block.hour || '08:00';
+  const endHour = Math.min(PLANNER_END_HOUR, Math.max(timeToHour(start) + 1, timeToHour(block.end || hourToTime(timeToHour(start) + 1))));
+  return {
+    id: block.id || ('pb' + Date.now() + '_' + index),
+    title: block.title || block.note || '',
+    day: block.day || 'lunes',
+    start,
+    end: hourToTime(endHour),
+    category: PLANNER_CATEGORIES[category] ? category : 'task',
+    color: block.color || PLANNER_COLORS[index % PLANNER_COLORS.length]
+  };
+}
+
+function migratePlannerObject(data) {
+  const migrated = [];
+  Object.keys(data || {}).forEach(dateKeyValue => {
+    const date = new Date(dateKeyValue + 'T00:00:00');
+    const dayIndex = Number.isNaN(date.getTime()) ? 0 : (date.getDay() + 6) % 7;
+    const day = PLANNER_DAYS[dayIndex].key;
+    Object.keys(data[dateKeyValue] || {}).forEach((hour, index) => {
+      migrated.push(normalizePlannerBlock({
+        ...data[dateKeyValue][hour],
+        day,
+        start: hour,
+        end: hourToTime(Math.min(PLANNER_END_HOUR, timeToHour(hour) + 1))
+      }, migrated.length + index));
+    });
+  });
+  savePlannerBlocks(migrated);
+  return migrated;
+}
+
+function getPlannerBlocks() {
+  const raw = localStorage.getItem(PLANNER_KEY);
+  if (!raw) return [];
+  try {
+    const data = JSON.parse(raw);
+    if (Array.isArray(data)) return data.map(normalizePlannerBlock);
+    return migratePlannerObject(data);
+  } catch {
+    return [];
+  }
+}
 function savePlannerBlocks(data) { localStorage.setItem(PLANNER_KEY, JSON.stringify(data)); }
 
-function goTodayPlanner() {
-  document.getElementById('planner-date').value = todayKey();
-  renderPlanner();
+function setPlannerColor(color) {
+  plannerSelectedColor = color || PLANNER_COLORS[0];
+  const custom = document.getElementById('planner-custom-color');
+  if (custom && custom.value !== plannerSelectedColor) custom.value = plannerSelectedColor;
+  document.querySelectorAll('.planner-color-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.color.toLowerCase() === plannerSelectedColor.toLowerCase());
+  });
+}
+
+function initPlannerControls() {
+  if (plannerControlsReady) return;
+  const daySelect = document.getElementById('planner-day');
+  const startSelect = document.getElementById('planner-start');
+  const endSelect = document.getElementById('planner-end');
+  const categorySelect = document.getElementById('planner-category');
+  const colorWrap = document.getElementById('planner-color-presets');
+  if (!daySelect || !startSelect || !endSelect || !categorySelect || !colorWrap) return;
+
+  daySelect.innerHTML = PLANNER_DAYS.map(day => `<option value="${day.key}">${day.label}</option>`).join('');
+  startSelect.innerHTML = '';
+  for (let h = PLANNER_START_HOUR; h < PLANNER_END_HOUR; h++) {
+    startSelect.innerHTML += `<option value="${hourToTime(h)}">${hourToTime(h)}</option>`;
+  }
+  endSelect.innerHTML = '';
+  for (let h = PLANNER_START_HOUR + 1; h <= PLANNER_END_HOUR; h++) {
+    endSelect.innerHTML += `<option value="${hourToTime(h)}">${hourToTime(h)}</option>`;
+  }
+  startSelect.value = '08:00';
+  endSelect.value = '10:00';
+  categorySelect.innerHTML = Object.keys(PLANNER_CATEGORIES).map(key => {
+    const cat = PLANNER_CATEGORIES[key];
+    return `<option value="${key}">${cat.emoji} ${cat.label}</option>`;
+  }).join('');
+  colorWrap.innerHTML = '<span class="planner-color-label">Color</span>' + PLANNER_COLORS.map(color =>
+    `<button type="button" class="planner-color-btn" data-color="${color}" style="background:${color}" onclick="setPlannerColor('${color}')" aria-label="Elegir color ${color}"></button>`
+  ).join('') + `<input type="color" id="planner-custom-color" class="planner-custom-color" value="${plannerSelectedColor}" onchange="setPlannerColor(this.value)" aria-label="Color personalizado">`;
+  setPlannerColor(plannerSelectedColor);
+  plannerControlsReady = true;
+}
+
+function resetPlannerForm() {
+  plannerEditingId = null;
+  const title = document.getElementById('planner-title');
+  if (title) title.value = '';
+  const saveBtn = document.getElementById('planner-save-btn');
+  if (saveBtn) saveBtn.textContent = 'Guardar bloque';
+  setPlannerColor(PLANNER_COLORS[0]);
 }
 
 function savePlannerBlock() {
-  const note = document.getElementById('planner-note').value.trim();
-  const hour = document.getElementById('planner-hour').value;
-  const type = document.getElementById('planner-type').value;
-  if (!note) return showToast('Escribí una actividad para el bloque');
-  const key = plannerDateKey();
-  const all = getPlannerBlocks();
-  if (!all[key]) all[key] = {};
-  all[key][hour] = { note, type };
-  savePlannerBlocks(all);
-  document.getElementById('planner-note').value = '';
+  initPlannerControls();
+  const title = document.getElementById('planner-title').value.trim();
+  const day = document.getElementById('planner-day').value;
+  const start = document.getElementById('planner-start').value;
+  const end = document.getElementById('planner-end').value;
+  const category = document.getElementById('planner-category').value;
+  if (!title) return showToast('Escribí un título para el bloque');
+  if (timeToHour(start) >= timeToHour(end)) return showToast('La hora de fin tiene que ser posterior al inicio');
+  const blocks = getPlannerBlocks();
+  const wasEditing = !!plannerEditingId;
+  const nextBlock = { id: plannerEditingId || ('pb' + Date.now()), title, day, start, end, category, color: plannerSelectedColor };
+  if (plannerEditingId) {
+    const idx = blocks.findIndex(block => block.id === plannerEditingId);
+    if (idx > -1) blocks[idx] = nextBlock;
+  } else {
+    blocks.push(nextBlock);
+  }
+  savePlannerBlocks(blocks);
+  resetPlannerForm();
   renderPlanner();
-  showToast('Bloque guardado ✨');
+  showToast(wasEditing ? 'Bloque actualizado ✨' : 'Bloque guardado ✨');
 }
 
-function deletePlannerBlock(hour) {
-  const all = getPlannerBlocks(); const key = plannerDateKey();
-  if (all[key]) delete all[key][hour];
-  savePlannerBlocks(all); renderPlanner();
+function editPlannerBlock(id) {
+  initPlannerControls();
+  const block = getPlannerBlocks().find(item => item.id === id);
+  if (!block) return;
+  plannerEditingId = id;
+  document.getElementById('planner-title').value = block.title;
+  document.getElementById('planner-day').value = block.day;
+  document.getElementById('planner-start').value = block.start;
+  document.getElementById('planner-end').value = block.end;
+  document.getElementById('planner-category').value = block.category;
+  setPlannerColor(block.color);
+  document.getElementById('planner-save-btn').textContent = 'Actualizar bloque';
+  document.getElementById('planner-title').focus();
+}
+
+function deletePlannerBlock(id) {
+  const block = getPlannerBlocks().find(item => item.id === id);
+  if (!block) return;
+  if (!confirm('¿Eliminar este bloque del planner?')) return;
+  savePlannerBlocks(getPlannerBlocks().filter(item => item.id !== id));
+  if (plannerEditingId === id) resetPlannerForm();
+  renderPlanner();
 }
 
 function renderPlanner() {
-  const dateInp = document.getElementById('planner-date');
-  if (dateInp && !dateInp.value) dateInp.value = todayKey();
-  const hourSel = document.getElementById('planner-hour');
-  if (hourSel && !hourSel.options.length) {
-    for (let h=0; h<24; h++) {
-      const hh = String(h).padStart(2,'0') + ':00';
-      const op = document.createElement('option'); op.value = hh; op.textContent = hh;
-      hourSel.appendChild(op);
-    }
+  initPlannerControls();
+  const grid = document.getElementById('planner-grid');
+  if (!grid) return;
+  grid.innerHTML = '<div class="planner-head time-head" style="grid-column:1;grid-row:1">Hora</div>' + PLANNER_DAYS.map((day, index) => `<div class="planner-head" style="grid-column:${index + 2};grid-row:1">${day.label}</div>`).join('');
+  for (let h = PLANNER_START_HOUR; h < PLANNER_END_HOUR; h++) {
+    const row = h - PLANNER_START_HOUR + 2;
+    grid.innerHTML += `<div class="planner-time" style="grid-column:1;grid-row:${row}">${hourToTime(h)}</div>`;
+    PLANNER_DAYS.forEach((day, index) => {
+      grid.innerHTML += `<div class="planner-cell" style="grid-column:${index + 2};grid-row:${row}" data-day="${day.key}" data-hour="${hourToTime(h)}"></div>`;
+    });
   }
-  const all = getPlannerBlocks();
-  const day = all[plannerDateKey()] || {};
-  const list = document.getElementById('planner-list');
-  if (!list) return;
-  const icon = {work:'💼', study:'📘', task:'✅', free:'🌸'};
-  list.innerHTML = '';
-  for (let h=0; h<24; h++) {
-    const hh = String(h).padStart(2,'0') + ':00';
-    const block = day[hh];
-    const div = document.createElement('div');
-    const type = block ? block.type : 'free';
-    const rowClass = block ? `planner-row filled type-${type}` : 'planner-row empty';
-    div.className = rowClass;
-    div.innerHTML = `<div class="planner-hour">${hh}</div><div class="planner-content ${block ? '' : 'planner-empty'}"><span class="planner-dot"></span>${block ? (icon[type] + ' ' + block.note) : 'Libre'}</div>${block ? `<button class="task-del" onclick="deletePlannerBlock('${hh}')">✕</button>` : ''}`;
-    list.appendChild(div);
+  const blocks = getPlannerBlocks().sort((a, b) => PLANNER_DAYS.findIndex(d => d.key === a.day) - PLANNER_DAYS.findIndex(d => d.key === b.day) || timeToHour(a.start) - timeToHour(b.start));
+  blocks.forEach(block => {
+    const dayIndex = PLANNER_DAYS.findIndex(day => day.key === block.day);
+    const startHour = Math.max(PLANNER_START_HOUR, timeToHour(block.start));
+    const endHour = Math.min(PLANNER_END_HOUR, timeToHour(block.end));
+    if (dayIndex < 0 || endHour <= PLANNER_START_HOUR || startHour >= PLANNER_END_HOUR) return;
+    const cat = PLANNER_CATEGORIES[block.category] || PLANNER_CATEGORIES.task;
+    const item = document.createElement('div');
+    item.className = 'planner-block';
+    item.style.gridColumn = String(dayIndex + 2);
+    item.style.gridRow = `${startHour - PLANNER_START_HOUR + 2} / span ${Math.max(1, endHour - startHour)}`;
+    item.style.background = `linear-gradient(135deg, ${block.color}, rgba(255,255,255,0.82))`;
+    item.innerHTML = `
+      <div class="planner-block-top">
+        <div>
+          <div class="planner-block-title">${cat.emoji} ${escapeHtml(block.title)}</div>
+          <div class="planner-block-meta">${block.start}–${block.end} · ${cat.label}</div>
+        </div>
+        <div class="planner-block-actions">
+          <button class="planner-mini-btn" onclick="editPlannerBlock('${block.id}')" title="Editar" aria-label="Editar">✎</button>
+          <button class="planner-mini-btn" onclick="deletePlannerBlock('${block.id}')" title="Eliminar" aria-label="Eliminar">×</button>
+        </div>
+      </div>`;
+    grid.appendChild(item);
+  });
+  const emptyNote = document.getElementById('planner-empty-note');
+  if (emptyNote) {
+    emptyNote.textContent = blocks.length ? `${blocks.length} bloque${blocks.length === 1 ? '' : 's'} en tu semana` : 'Tu semana está libre todavía. Agregá un bloque para empezar a armar tu horario.';
   }
 }
 

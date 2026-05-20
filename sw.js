@@ -1,12 +1,14 @@
 // Celeste ✨ — Service Worker
 // ⚠️ Subí este número cada vez que hagas un deploy para forzar la actualización
-const CACHE_NAME = 'celeste-v3';
-const ASSETS = ['./index.html', './manifest.json'];
+const CACHE_NAME = 'celeste-v4';
+const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 // ── INSTALACIÓN: cachea los archivos principales ──
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(err => {
+      console.warn('Celeste SW: no se pudieron cachear todos los esenciales.', err);
+    }))
   );
   self.skipWaiting();
 });
@@ -23,7 +25,9 @@ self.addEventListener('activate', event => {
 
 // ── FETCH: network-first para index.html, cache-first para el resto ──
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
   const isPage = url.pathname.endsWith('index.html') || url.pathname.endsWith('/');
 
   if (isPage) {
@@ -40,7 +44,13 @@ self.addEventListener('fetch', event => {
   } else {
     // Cache first para el resto (manifest, íconos, etc.)
     event.respondWith(
-      caches.match(event.request).then(cached => cached || fetch(event.request))
+      caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+        if (response && response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }))
     );
   }
 });

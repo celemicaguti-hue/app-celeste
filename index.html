@@ -5,6 +5,13 @@
 <meta name="theme-color" content="#ff85a1">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="application-name" content="Celeste">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Celeste">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>Celeste ✨</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -1333,11 +1340,133 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
 <script>
 // ─────────────────────────── PASSWORD ───────────────────────────
 const PASSWORD = 'todoesmaravilloso';
+const MEDIA_TITLE = 'Celeste';
+const MEDIA_ARTIST = 'Celeste app';
+let appAudioUnlocked = false;
+let lastSpokenText = '';
+let ttsRestoreWanted = false;
+let timerRestoreWanted = false;
+let activeTimerSoundNodes = [];
+
+function unlockAppAudio(reason) {
+  const wasUnlocked = appAudioUnlocked;
+  appAudioUnlocked = true;
+  if (window.speechSynthesis) {
+    try {
+      window.speechSynthesis.resume();
+    } catch (e) {
+      console.warn('Celeste audio: no se pudo preparar speechSynthesis.', e);
+    }
+  }
+  setupMediaSession();
+  if (!wasUnlocked) console.log('Celeste audio: audio habilitado por interaccion de usuario.', reason || '');
+}
+
+function updateMediaPlaybackState(state) {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.playbackState = state;
+  } catch (e) {
+    console.warn('Celeste audio: no se pudo actualizar Media Session.', e);
+  }
+}
+
+function stopTimerSound() {
+  activeTimerSoundNodes.forEach(node => {
+    try { node.stop(0); } catch (e) {}
+    try { node.disconnect(); } catch (e) {}
+  });
+  activeTimerSoundNodes = [];
+}
+
+function setupMediaSession() {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: lastSpokenText || MEDIA_TITLE,
+      artist: MEDIA_ARTIST,
+      album: currentCat || 'Afirmaciones',
+      artwork: [
+        { src: './icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: './icon-512.png', sizes: '512x512', type: 'image/png' }
+      ]
+    });
+    navigator.mediaSession.setActionHandler('play', () => restoreAppAudio('media-session-play'));
+    navigator.mediaSession.setActionHandler('pause', () => {
+      if (window.speechSynthesis && window.speechSynthesis.speaking) window.speechSynthesis.pause();
+      updateMediaPlaybackState('paused');
+    });
+    navigator.mediaSession.setActionHandler('stop', () => {
+      stopTTS();
+      stopTimerSound();
+      updateMediaPlaybackState('none');
+    });
+  } catch (e) {
+    console.warn('Celeste audio: Media Session API no disponible completamente.', e);
+  }
+}
+
+function rememberAudioState() {
+  const synth = window.speechSynthesis;
+  ttsRestoreWanted = !!(ttsEnabled && currentUtterance && synth && (synth.speaking || synth.pending || synth.paused));
+  timerRestoreWanted = !!atRunning;
+}
+
+function restoreAppAudio(reason) {
+  if (!appAudioUnlocked) return;
+  const synth = window.speechSynthesis;
+  if (synth && ttsEnabled) {
+    try {
+      if (synth.paused || synth.speaking || synth.pending || ttsRestoreWanted) synth.resume();
+      if (ttsRestoreWanted && autoMode && !currentUtterance && lastSpokenText) {
+        clearAutoTimer();
+        autoTimer = setTimeout(nextAffirmation, 350);
+      }
+      updateMediaPlaybackState(currentUtterance ? 'playing' : 'paused');
+    } catch (e) {
+      console.warn('Celeste audio: no se pudo restaurar TTS al volver.', reason || '', e);
+    }
+  }
+  if (timerRestoreWanted && atRunning && timerAudioCtx && timerAudioCtx.state === 'suspended') {
+    timerAudioCtx.resume().catch(e => console.warn('Celeste audio: no se pudo restaurar el timer.', e));
+  }
+  ttsRestoreWanted = false;
+  timerRestoreWanted = false;
+}
+
+function handleAudioLifecycle(eventName) {
+  if (document.visibilityState === 'hidden' || eventName === 'pagehide' || eventName === 'blur') {
+    rememberAudioState();
+    return;
+  }
+  restoreAppAudio(eventName);
+}
+
+document.addEventListener('visibilitychange', () => handleAudioLifecycle('visibilitychange'));
+window.addEventListener('pageshow', () => handleAudioLifecycle('pageshow'));
+window.addEventListener('pagehide', () => handleAudioLifecycle('pagehide'));
+window.addEventListener('focus', () => handleAudioLifecycle('focus'));
+window.addEventListener('blur', () => handleAudioLifecycle('blur'));
+
+setInterval(() => {
+  if (document.visibilityState !== 'visible') return;
+  if (window.speechSynthesis && currentUtterance && window.speechSynthesis.paused) {
+    try {
+      window.speechSynthesis.resume();
+    } catch (e) {
+      console.warn('Celeste audio: keepalive suave de TTS fallo.', e);
+    }
+  }
+  if (atRunning && timerAudioCtx && timerAudioCtx.state === 'suspended') {
+    timerAudioCtx.resume().catch(e => console.warn('Celeste audio: keepalive suave del timer fallo.', e));
+  }
+}, 15000);
 
 function checkPassword() {
   const inp = document.getElementById('lock-input');
   const err = document.getElementById('lock-error');
   if (inp.value.toLowerCase().trim() === PASSWORD) {
+    unlockAppAudio('unlock-screen');
     document.getElementById('lock-screen').style.display = 'none';
     document.getElementById('main-app').style.display = 'flex';
     document.getElementById('main-app').style.flexDirection = 'column';
@@ -1478,6 +1607,7 @@ function onVoiceChange() {
   selectedVoice = sorted[parseInt(val)] || null;
 }
 function toggleTTS() {
+  unlockAppAudio('toggle-tts');
   ttsEnabled = !ttsEnabled;
   const sw = document.getElementById('tts-switch');
   sw.classList.toggle('on', ttsEnabled);
@@ -1487,20 +1617,28 @@ function toggleTTS() {
 function stopTTS() {
   if (currentUtterance) currentUtterance._manuallyStopped = true;
   if (window.speechSynthesis) window.speechSynthesis.cancel();
-  document.getElementById('tts-wave').classList.remove('active');
-  document.getElementById('affirmation-display').classList.remove('speaking');
+  const wave = document.getElementById('tts-wave');
+  const display = document.getElementById('affirmation-display');
+  if (wave) wave.classList.remove('active');
+  if (display) display.classList.remove('speaking');
   currentUtterance = null;
+  updateMediaPlaybackState('paused');
 }
 function speakText(text) {
   if (!ttsEnabled || !window.speechSynthesis) return;
+  unlockAppAudio('speak-text');
   stopTTS();
+  lastSpokenText = text;
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = 'es-AR'; utter.rate = ttsRate; utter.volume = ttsVolume; utter.pitch = 1.05;
   if (selectedVoice) utter.voice = selectedVoice;
   const cleanup = () => {
-    document.getElementById('tts-wave').classList.remove('active');
-    document.getElementById('affirmation-display').classList.remove('speaking');
+    const wave = document.getElementById('tts-wave');
+    const display = document.getElementById('affirmation-display');
+    if (wave) wave.classList.remove('active');
+    if (display) display.classList.remove('speaking');
     if (currentUtterance === utter) currentUtterance = null;
+    updateMediaPlaybackState('paused');
   };
   const advanceAfterSpeech = () => {
     cleanup();
@@ -1510,13 +1648,25 @@ function speakText(text) {
     }
   };
   utter.onstart = () => {
-    document.getElementById('tts-wave').classList.add('active');
-    document.getElementById('affirmation-display').classList.add('speaking');
+    const wave = document.getElementById('tts-wave');
+    const display = document.getElementById('affirmation-display');
+    if (wave) wave.classList.add('active');
+    if (display) display.classList.add('speaking');
+    setupMediaSession();
+    updateMediaPlaybackState('playing');
   };
   utter.onend = advanceAfterSpeech;
-  utter.onerror = advanceAfterSpeech;
+  utter.onerror = event => {
+    console.warn('Celeste audio: error al reproducir TTS.', event.error || event);
+    advanceAfterSpeech();
+  };
   currentUtterance = utter;
-  window.speechSynthesis.speak(utter);
+  try {
+    window.speechSynthesis.speak(utter);
+  } catch (e) {
+    console.warn('Celeste audio: speechSynthesis.speak fallo.', e);
+    cleanup();
+  }
 }
 
 // ─────────────────────────── STREAK ───────────────────────────
@@ -1659,6 +1809,7 @@ function deleteCurrentCategory() {
 }
 
 function nextAffirmation() {
+  unlockAppAudio('next-affirmation');
   const phrases = myData[currentCat];
   if (!phrases.length) { document.getElementById('affirmation-display').innerText = '¡Categoría vacía! Agregá una frase.'; return; }
   const phrase = phrases[Math.floor(Math.random() * phrases.length)];
@@ -1766,7 +1917,9 @@ function unlockTimerSound() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) return;
   if (!timerAudioCtx) timerAudioCtx = new AudioContext();
-  if (timerAudioCtx.state === 'suspended') timerAudioCtx.resume();
+  if (timerAudioCtx.state === 'suspended') {
+    timerAudioCtx.resume().catch(e => console.warn('Celeste audio: no se pudo habilitar el sonido del timer.', e));
+  }
 }
 function clampTimerVolume(v) { const n = parseFloat(v); if (Number.isNaN(n)) return 0.85; return Math.min(1, Math.max(0.1, n)); }
 function loadTimerSoundSettings() {
@@ -1792,13 +1945,17 @@ function updateTimerVolumeLabel(save = true) {
   label.innerText = Math.round(timerVolume * 100) + '%';
   if (save) localStorage.setItem('celeste_timer_volume', timerVolume);
 }
-function previewTimerSound() { unlockTimerSound(); saveTimerSoundSettings(); updateTimerVolumeLabel(true); playTimerDoneSound(); }
+function previewTimerSound() { unlockAppAudio('preview-timer-sound'); unlockTimerSound(); saveTimerSoundSettings(); updateTimerVolumeLabel(true); playTimerDoneSound(); }
 function playTimerDoneSound() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) return;
+  stopTTS();
+  stopTimerSound();
   if (!timerAudioCtx) timerAudioCtx = new AudioContext();
   const ctx = timerAudioCtx;
-  if (ctx.state === 'suspended') ctx.resume();
+  if (ctx.state === 'suspended') {
+    ctx.resume().catch(e => console.warn('Celeste audio: no se pudo reproducir el sonido del timer.', e));
+  }
   const now = ctx.currentTime;
   const master = ctx.createGain();
   const sound = timerRingtone || 'brillito';
@@ -1824,7 +1981,9 @@ function playTimerDoneSound() {
     gain.gain.exponentialRampToValueAtTime(cfg.gain, start + 0.018);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + cfg.dur);
     osc.connect(gain); gain.connect(master); osc.start(start); osc.stop(start + cfg.dur + 0.05);
+    activeTimerSoundNodes.push(osc);
   });
+  setTimeout(() => { activeTimerSoundNodes = []; }, Math.ceil((cfg.dur + cfg.notes.length * cfg.step + 0.4) * 1000));
   if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
 }
 
@@ -1853,6 +2012,7 @@ function setCustomAffirmTimer() {
   updateTimerDisplay();
 }
 function toggleAffirmTimer() {
+  unlockAppAudio('toggle-timer');
   const btn = document.getElementById('at-start-btn');
   if (!atRunning) {
     unlockTimerSound();

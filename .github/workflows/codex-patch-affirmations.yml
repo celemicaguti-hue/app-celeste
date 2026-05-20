@@ -1,0 +1,60 @@
+name: Codex patch affirmation limits
+
+on:
+  push:
+    branches:
+      - codex/fix-affirmation-history-goal
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Patch index.html
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          replacements = [
+              (
+                  'width: 60px; padding: 6px 10px; border-radius: 10px;',
+                  'width: 90px; padding: 6px 10px; border-radius: 10px;'
+              ),
+              (
+                  '<input type="number" id="daily-goal-input" value="10" min="1" max="1000" onchange="saveDailyGoal()">',
+                  '<input type="number" id="daily-goal-input" value="10" min="1" step="1" inputmode="numeric" onchange="saveDailyGoal()">'
+              ),
+              (
+                  "function getDailyGoal() { return parseInt(localStorage.getItem('celeste_daily_goal')) || 10; }\nfunction saveDailyGoal() {\n  const v = parseInt(document.getElementById('daily-goal-input').value) || 10;\n  localStorage.setItem('celeste_daily_goal', v);",
+                  "function parsePositiveInt(value, fallback) {\n  const n = parseInt(value, 10);\n  return Number.isFinite(n) && n > 0 ? n : fallback;\n}\nfunction getDailyGoal() { return parsePositiveInt(localStorage.getItem('celeste_daily_goal'), 10); }\nfunction saveDailyGoal() {\n  const input = document.getElementById('daily-goal-input');\n  const v = parsePositiveInt(input.value, 10);\n  input.value = v;\n  localStorage.setItem('celeste_daily_goal', v);"
+              ),
+              (
+                  '  while (h.length > 1000) h.pop();\n',
+                  ''
+              ),
+          ]
+
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Missing expected text: {old[:80]!r}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Remove temporary workflow
+        run: rm -f .github/workflows/codex-patch-affirmations.yml
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/codex-patch-affirmations.yml
+          git commit -m "Fix affirmation history and daily goal limits"
+          git push

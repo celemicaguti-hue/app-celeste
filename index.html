@@ -287,7 +287,7 @@ body {
   display: flex; align-items: center; gap: 8px; margin-top: 8px;
 }
 .streak-goal-input input {
-  width: 60px; padding: 6px 10px; border-radius: 10px;
+  width: 90px; padding: 6px 10px; border-radius: 10px;
   border: 1.5px solid rgba(255,133,161,0.3);
   background: rgba(255,255,255,0.8);
   font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
@@ -943,7 +943,7 @@ input[type="range"] { flex-grow: 1; accent-color: var(--pink); cursor: pointer; 
         <div class="streak-label">Días seguidos</div>
         <div class="streak-goal">Meta diaria: <span id="streak-goal-val">10</span> afirmaciones/día</div>
         <div class="streak-goal-input">
-          <input type="number" id="daily-goal-input" value="10" min="1" max="1000" onchange="saveDailyGoal()">
+          <input type="number" id="daily-goal-input" value="10" min="1" step="1" inputmode="numeric" onchange="saveDailyGoal()">
           <span>por día</span>
         </div>
       </div>
@@ -1670,9 +1670,15 @@ function speakText(text) {
 }
 
 // ─────────────────────────── STREAK ───────────────────────────
-function getDailyGoal() { return parseInt(localStorage.getItem('celeste_daily_goal')) || 10; }
+function parsePositiveInt(value, fallback) {
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+function getDailyGoal() { return parsePositiveInt(localStorage.getItem('celeste_daily_goal'), 10); }
 function saveDailyGoal() {
-  const v = parseInt(document.getElementById('daily-goal-input').value) || 10;
+  const input = document.getElementById('daily-goal-input');
+  const v = parsePositiveInt(input.value, 10);
+  input.value = v;
   localStorage.setItem('celeste_daily_goal', v);
   document.getElementById('streak-goal-val').innerText = v;
   updateStreak();
@@ -2146,7 +2152,6 @@ function saveHistory(h) { localStorage.setItem('matepi_history', JSON.stringify(
 function saveHistoryEntry(cat, phrase, source = 'manual') {
   const h = getHistory();
   h.unshift({ cat, phrase, ts: Date.now(), source });
-  while (h.length > 1000) h.pop();
   saveHistory(h);
 }
 

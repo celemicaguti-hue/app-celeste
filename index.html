@@ -16,11 +16,7 @@
   <style>
     html, body { margin:0; width:100%; height:100%; overflow:hidden; background:#f7eef7; }
     #celeste-frame { position:fixed; inset:0; width:100%; height:100%; border:0; background:#fff; }
-    #privacy-veil {
-      position:fixed; inset:0; z-index:999999; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(135deg,#f7dce8 0%,#dceeff 52%,#e0f3ec 100%);
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    }
+    #privacy-veil { position:fixed; inset:0; z-index:999999; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#f7dce8 0%,#dceeff 52%,#e0f3ec 100%); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     #privacy-veil.hidden { display:none; }
     .privacy-card { width:min(88vw,360px); padding:30px 24px; text-align:center; border-radius:28px; background:rgba(255,255,255,.82); box-shadow:0 18px 55px rgba(90,65,110,.14); border:1px solid rgba(255,255,255,.95); }
     .privacy-icon { font-size:40px; margin-bottom:10px; }
@@ -33,16 +29,9 @@
 <body>
   <iframe id="celeste-frame" src="legacy.html" title="Rutina"></iframe>
   <button id="quick-hide" type="button" aria-label="Ocultar contenido">◉ Ocultar</button>
-  <div id="privacy-veil">
-    <div class="privacy-card">
-      <div class="privacy-icon">🌷</div>
-      <div class="privacy-title">Rutina</div>
-      <div class="privacy-sub">Tu contenido personal está oculto. Un toque para continuar.</div>
-      <button class="privacy-show" id="privacy-show" type="button">Abrir</button>
-    </div>
-  </div>
+  <div id="privacy-veil"><div class="privacy-card"><div class="privacy-icon">🌷</div><div class="privacy-title">Rutina</div><div class="privacy-sub">Tu contenido personal está oculto. Un toque para continuar.</div><button class="privacy-show" id="privacy-show" type="button">Abrir</button></div></div>
   <script src="enhancements.js"></script>
   <script src="intensity-safe.js?v=1"></script>
-  <script src="theme-safe.js?v=1"></script>
+  <script src="theme-safe.js?v=4"></script>
 </body>
 </html>

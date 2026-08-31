@@ -41,6 +41,11 @@
       <button class="privacy-show" id="privacy-show" type="button">Abrir</button>
     </div>
   </div>
-  <script src="enhancements.js"></script>
+  <script src="enhancements.js?v=working-178"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
+    }
+  </script>
 </body>
 </html>

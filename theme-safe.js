@@ -1,113 +1,23 @@
 (() => {
   'use strict';
-
-  const frame = document.getElementById('celeste-frame');
-  const STORAGE_KEY = 'celeste_theme_mode';
-  let installedDoc = null;
-
-  function getMode() {
-    try { return localStorage.getItem(STORAGE_KEY) || 'light'; } catch (_) { return 'light'; }
-  }
-
-  function setMode(mode) {
-    try { localStorage.setItem(STORAGE_KEY, mode); } catch (_) {}
-    applyOuter(mode);
-    if (frame.contentDocument) applyInner(frame.contentDocument, mode);
-  }
-
-  function applyOuter(mode) {
-    document.documentElement.dataset.celesteTheme = mode;
-    const oled = mode === 'oled';
-    const dark = mode === 'dark';
-    document.body.style.background = oled ? '#000000' : dark ? '#101014' : '#f7eef7';
-    frame.style.background = oled ? '#000000' : dark ? '#101014' : '#ffffff';
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', oled ? '#000000' : dark ? '#101014' : '#ff85a1');
-    const veil = document.getElementById('privacy-veil');
-    if (veil) {
-      veil.style.background = oled ? '#000000' : dark ? 'linear-gradient(135deg,#18131b,#111923,#101c19)' : 'linear-gradient(135deg,#f7dce8 0%,#dceeff 52%,#e0f3ec 100%)';
-    }
-    const card = document.querySelector('.privacy-card');
-    if (card) {
-      card.style.background = oled ? '#050505' : dark ? 'rgba(28,28,34,.95)' : 'rgba(255,255,255,.82)';
-      card.style.borderColor = oled ? '#161616' : dark ? '#39343f' : 'rgba(255,255,255,.95)';
-    }
-    document.querySelectorAll('.privacy-title').forEach(el => el.style.color = (dark || oled) ? '#f7eef7' : '#443a54');
-    document.querySelectorAll('.privacy-sub').forEach(el => el.style.color = (dark || oled) ? '#aaa4b2' : '#8d8799');
-  }
-
-  function ensureStyle(doc) {
-    let style = doc.getElementById('celeste-theme-safe-style');
-    if (style) return style;
-    style = doc.createElement('style');
-    style.id = 'celeste-theme-safe-style';
-    style.textContent = `
-      #celeste-theme-control{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:0 auto 14px;width:min(100%,var(--panel-max-width));}
-      #celeste-theme-control button{border:1px solid rgba(255,133,161,.18);border-radius:13px;padding:8px 11px;background:rgba(255,255,255,.68);font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;color:var(--text-soft);cursor:pointer;}
-      #celeste-theme-control button.active{background:linear-gradient(135deg,var(--pink),#c97fff);color:#fff;border-color:transparent;}
-
-      body.celeste-dark{background:#101014 !important;color:#eeeaf2 !important;}
-      body.celeste-dark:before,body.celeste-dark:after{display:none !important;}
-      body.celeste-dark{--glass:rgba(30,30,36,.88);--glass-strong:rgba(39,39,46,.96);--text:#f2edf5;--text-soft:#aaa4b2;--shadow:0 8px 28px rgba(0,0,0,.30);}
-      body.celeste-dark .card,body.celeste-dark .tab-bar,body.celeste-dark .celeste-addon-section{background:rgba(28,28,34,.94) !important;border-color:#3a3640 !important;box-shadow:var(--shadow) !important;}
-      body.celeste-dark .affirmation-display,body.celeste-dark .feedback-row,body.celeste-dark .feedback-slider,body.celeste-dark .record-box,body.celeste-dark input,body.celeste-dark select,body.celeste-dark textarea,body.celeste-dark .pill{background:#25252c !important;border-color:#3d3943 !important;color:#f2edf5 !important;}
-      body.celeste-dark .tab-btn:not(.active),body.celeste-dark .btn-sec,body.celeste-dark .feedback-test button{background:#25252c !important;color:#d8d2df !important;border-color:#3d3943 !important;}
-      body.celeste-dark #celeste-theme-control button{background:#25252c;color:#d8d2df;border-color:#3d3943;}
-      body.celeste-dark #celeste-theme-control button.active{background:linear-gradient(135deg,var(--pink),#c97fff);color:#fff;}
-
-      body.celeste-oled{background:#000000 !important;color:#f5f5f7 !important;}
-      body.celeste-oled:before,body.celeste-oled:after{display:none !important;}
-      body.celeste-oled{--glass:#000000;--glass-strong:#070707;--text:#f5f5f7;--text-soft:#aaa6ad;--shadow:none;}
-      body.celeste-oled .card,body.celeste-oled .tab-bar,body.celeste-oled .celeste-addon-section{background:#000000 !important;border-color:#1b1b1b !important;box-shadow:none !important;backdrop-filter:none !important;}
-      body.celeste-oled .affirmation-display,body.celeste-oled .feedback-row,body.celeste-oled .feedback-slider,body.celeste-oled .record-box,body.celeste-oled input,body.celeste-oled select,body.celeste-oled textarea,body.celeste-oled .pill{background:#050505 !important;border-color:#202020 !important;color:#f5f5f7 !important;box-shadow:none !important;}
-      body.celeste-oled .tab-btn:not(.active),body.celeste-oled .btn-sec,body.celeste-oled .feedback-test button{background:#050505 !important;color:#d8d8dc !important;border-color:#202020 !important;box-shadow:none !important;}
-      body.celeste-oled #celeste-theme-control button{background:#050505;color:#d8d8dc;border-color:#202020;}
-      body.celeste-oled #celeste-theme-control button.active{background:linear-gradient(135deg,#ff5f8a,#a85cff);color:#fff;}
-      body.celeste-oled .heat-cell{border-color:#161616 !important;}
-    `;
-    doc.head.appendChild(style);
-    return style;
-  }
-
-  function ensureControl(doc) {
-    if (doc.getElementById('celeste-theme-control')) return;
-    const header = doc.querySelector('.app-header');
-    if (!header) return;
-    const box = doc.createElement('div');
-    box.id = 'celeste-theme-control';
-    box.innerHTML = `
-      <button type="button" data-theme="light">☀️ Claro</button>
-      <button type="button" data-theme="dark">🌙 Oscuro</button>
-      <button type="button" data-theme="oled">⚫ Ahorro OLED</button>
-    `;
-    header.insertAdjacentElement('afterend', box);
-    box.addEventListener('click', e => {
-      const btn = e.target.closest('button[data-theme]');
-      if (!btn) return;
-      setMode(btn.dataset.theme);
-    });
-  }
-
-  function applyInner(doc, mode) {
-    ensureStyle(doc);
-    ensureControl(doc);
-    installedDoc = doc;
-    doc.body.classList.toggle('celeste-dark', mode === 'dark');
-    doc.body.classList.toggle('celeste-oled', mode === 'oled');
-    doc.querySelectorAll('#celeste-theme-control button').forEach(btn => btn.classList.toggle('active', btn.dataset.theme === mode));
-  }
-
-  function install() {
-    const doc = frame.contentDocument;
-    if (!doc || !doc.body) return;
-    applyInner(doc, getMode());
-  }
-
-  applyOuter(getMode());
-  frame.addEventListener('load', () => setTimeout(install, 150));
-  let tries = 0;
-  const t = setInterval(() => {
-    install();
-    if ((installedDoc && frame.contentDocument === installedDoc) || ++tries > 80) clearInterval(t);
-  }, 100);
+  const frame=document.getElementById('celeste-frame'), KEY='celeste_theme_mode'; let installedDoc=null;
+  const getMode=()=>{try{return localStorage.getItem(KEY)||'light'}catch(_){return'light'}};
+  function outer(mode){const dark=mode!=='light',oled=mode==='oled';document.body.style.background=oled?'#000':dark?'#111014':'#f7eef7';frame.style.background=oled?'#000':dark?'#111014':'#fff';const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=oled?'#000000':dark?'#111014':'#ff85a1';const veil=document.getElementById('privacy-veil'),card=document.querySelector('.privacy-card');if(veil)veil.style.background=oled?'#000':dark?'linear-gradient(135deg,#18121c,#10141b,#0e1916)':'linear-gradient(135deg,#f7dce8 0%,#dceeff 52%,#e0f3ec 100%)';if(card){card.style.background=oled?'#080808':dark?'#211e25':'rgba(255,255,255,.82)';card.style.borderColor=oled?'#282828':dark?'#45404b':'rgba(255,255,255,.95)'}document.querySelectorAll('.privacy-title').forEach(x=>x.style.color=dark?'#fff':'#443a54');document.querySelectorAll('.privacy-sub').forEach(x=>x.style.color=dark?'#c5becb':'#8d8799');}
+  function style(doc){let s=doc.getElementById('celeste-theme-safe-style');if(s)return;s=doc.createElement('style');s.id='celeste-theme-safe-style';s.textContent=`
+#celeste-theme-control{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:0 auto 14px;width:min(100%,var(--panel-max-width))}#celeste-theme-control button{border:1px solid rgba(255,133,161,.18);border-radius:13px;padding:8px 11px;background:rgba(255,255,255,.68);font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;color:var(--text-soft);cursor:pointer}#celeste-theme-control button.active{background:linear-gradient(135deg,var(--pink),#c97fff);color:#fff;border-color:transparent}
+body.celeste-dark,body.celeste-oled{color-scheme:dark}body.celeste-dark:before,body.celeste-dark:after,body.celeste-oled:before,body.celeste-oled:after{display:none!important}
+body.celeste-dark{background:#111014!important;--glass:#211f25;--glass-strong:#2a272f;--text:#f7f2f8;--text-soft:#bdb5c3;--shadow:0 8px 28px rgba(0,0,0,.3)}
+body.celeste-oled{background:#000!important;--glass:#090909;--glass-strong:#101010;--text:#faf7fb;--text-soft:#bbb5bf;--shadow:none}
+body.celeste-dark .card,body.celeste-dark .tab-bar,body.celeste-dark .celeste-addon-section{background:#211f25!important;border-color:#413b47!important}body.celeste-oled .card,body.celeste-oled .tab-bar,body.celeste-oled .celeste-addon-section{background:#050505!important;border-color:#292929!important;box-shadow:none!important;backdrop-filter:none!important}
+body.celeste-dark :is(.affirmation-display,.feedback-row,.feedback-slider,.record-box,.habit-item,.task-item,.reminder-item,.evidence-item,.energy-item,.planner-item,.history-item,.stat-card,.timer-box,.robot-box,.voice-settings,.goal-box,.daily-box),body.celeste-dark :is(input,select,textarea){background:#2b2830!important;border-color:#4a4450!important;color:#f8f4f9!important}
+body.celeste-oled :is(.affirmation-display,.feedback-row,.feedback-slider,.record-box,.habit-item,.task-item,.reminder-item,.evidence-item,.energy-item,.planner-item,.history-item,.stat-card,.timer-box,.robot-box,.voice-settings,.goal-box,.daily-box),body.celeste-oled :is(input,select,textarea){background:#0d0d0d!important;border-color:#303030!important;color:#fafafa!important;box-shadow:none!important}
+body.celeste-dark :is(.pill,.tab-btn:not(.active),.btn-sec,.feedback-test button,.timer-preset,.small-btn,.filter-btn),body.celeste-dark #celeste-theme-control button{background:#302c35!important;color:#eee8f0!important;border-color:#4c4553!important}body.celeste-oled :is(.pill,.tab-btn:not(.active),.btn-sec,.feedback-test button,.timer-preset,.small-btn,.filter-btn),body.celeste-oled #celeste-theme-control button{background:#111!important;color:#f0edf1!important;border-color:#333!important;box-shadow:none!important}
+body.celeste-dark :is(.section-title,.feedback-label,label,h1,h2,h3,h4,strong,.counter-num,.timer-display),body.celeste-oled :is(.section-title,.feedback-label,label,h1,h2,h3,h4,strong,.counter-num,.timer-display){color:var(--text)!important}body.celeste-dark :is(.hint,.sub,.feedback-hint,.feedback-status,.record-lbl,.app-subtitle,small),body.celeste-oled :is(.hint,.sub,.feedback-hint,.feedback-status,.record-lbl,.app-subtitle,small){color:var(--text-soft)!important}
+body.celeste-dark input::placeholder,body.celeste-dark textarea::placeholder,body.celeste-oled input::placeholder,body.celeste-oled textarea::placeholder{color:#918a96!important;opacity:1}body.celeste-dark option{background:#2b2830;color:#fff}body.celeste-oled option{background:#0d0d0d;color:#fff}
+body.celeste-dark #celeste-theme-control button.active,body.celeste-oled #celeste-theme-control button.active{background:linear-gradient(135deg,#ff6e99,#b968ff)!important;color:#fff!important;border-color:transparent!important}body.celeste-oled .heat-cell{border-color:#242424!important}
+`;doc.head.appendChild(s)}
+  function control(doc){if(doc.getElementById('celeste-theme-control'))return;const h=doc.querySelector('.app-header');if(!h)return;const b=doc.createElement('div');b.id='celeste-theme-control';b.innerHTML='<button type="button" data-theme="light">☀️ Claro</button><button type="button" data-theme="dark">🌙 Oscuro</button><button type="button" data-theme="oled">⚫ Ahorro OLED</button>';h.insertAdjacentElement('afterend',b);b.addEventListener('click',e=>{const x=e.target.closest('button[data-theme]');if(x)setMode(x.dataset.theme)})}
+  function inner(doc,mode){style(doc);control(doc);installedDoc=doc;doc.body.classList.toggle('celeste-dark',mode==='dark');doc.body.classList.toggle('celeste-oled',mode==='oled');doc.querySelectorAll('#celeste-theme-control button').forEach(b=>b.classList.toggle('active',b.dataset.theme===mode))}
+  function setMode(mode){try{localStorage.setItem(KEY,mode)}catch(_){}outer(mode);if(frame.contentDocument)inner(frame.contentDocument,mode)}
+  function install(){const d=frame.contentDocument;if(d&&d.body)inner(d,getMode())}outer(getMode());frame.addEventListener('load',()=>setTimeout(install,150));let tries=0,t=setInterval(()=>{install();if((installedDoc&&frame.contentDocument===installedDoc)||++tries>80)clearInterval(t)},100);
 })();
